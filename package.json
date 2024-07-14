@@ -1,0 +1,45 @@
+{
+  "name": "@eatonfyi/ljarchive",
+  "version": "0.1.0",
+  "description": "A JS parser for LJArchive files",
+  "engines": {
+    "node": "^20.10.0"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "exports": {
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "/dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "run": "node --import=tsimp src/index.ts",
+    "build": "rm -rf dist; pkgroll --minify",
+    "format": "prettier --config prettier.config.js 'src/**/*.ts' --write",
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eaton/base"
+  },
+  "devDependencies": {
+    "ava": "^6.1.2",
+    "pkgroll": "^2.0.2",
+    "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "tsimp": "^2.0.11",
+    "@types/node": "^20.14.10",
+    "typedoc": "^0.26.4",
+    "typescript": "^5.5.3"
+  }
+}
