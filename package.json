@@ -25,7 +25,7 @@
   "scripts": {
     "run": "node --import=tsimp src/index.ts",
     "demo": "node --import=tsimp src/test.ts",
-    "build": "rm -rf dist; pkgroll --minify",
+    "build": "rm -rf dist; rm -rf .tsimp; pkgroll --minify",
     "format": "prettier --config prettier.config.js 'src/**/*.ts' --write",
     "test": "ava"
   },

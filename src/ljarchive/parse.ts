@@ -1,5 +1,5 @@
 import { Parser } from '../binary-parser.js';
-import { longStr, shortStr, timestamp, bitMask, optStr, anyField, usemask, oldLongStr } from './field-types.js';
+import { shortStr, timestamp, optStr, anyField, varString } from './field-types.js';
 
 const tables = new Parser()
   .uint32le('tableCount')
@@ -42,10 +42,11 @@ const event = Parser.start().useContextVars().nest({
     .uint16('Check', { assert: 2056 })
     .uint32le('ID')
     .nest('LastMod', { type: timestamp })
-    .seek(11)
+    .seek(6)
+    .nest('UseMask', { type: optStr })
     .seek(6)
     .nest('Subject', { type: optStr })
-    .nest('Body', { type: oldLongStr })
+    .nest('Body', { type: varString })
     .nest('Unknown1', { type: optStr })
     .nest('CustomMood', { type: optStr })
     .seek(2)
@@ -68,8 +69,26 @@ const event = Parser.start().useContextVars().nest({
   formatter: function (data) {
     return data;
   }
-})
+});
 
+const comments = Parser.start().useContextVars().nest({
+  type: Parser.start()
+    .uint16('Check', { assert: 2056 })
+    .uint32le('CommentID')
+    .seek(2)
+    .uint32le('UserID')
+    .nest('UserName', { type: optStr })
+    .uint32le('EntryID')
+    .seek(3)
+    .uint32le('ParentID')
+    .nest('Body', { type: varString })
+    .nest('Subject', { type: optStr })
+    .nest('Date', { type: timestamp })
+    .seek(15),
+  formatter: function (data) {
+    return data;
+  }
+});
 
 export function parseLjArchive(input: Buffer) {
   const journal = Parser.start()
@@ -78,7 +97,7 @@ export function parseLjArchive(input: Buffer) {
     .array('moods', { type: mood, length: 132 })
     .array('userPics', { type: userPic, length: 3 })
     .array('users', { type: user, length: 196 })
-    .array('events', { type: event, length: 1426 });
+    .array('events', { type: event, length: 1223 }); // 1223
 
   const parsed = journal.parse(input);
 

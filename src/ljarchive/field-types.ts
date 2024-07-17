@@ -2,11 +2,10 @@ import * as leb from '@thi.ng/leb128';
 import { Parser } from '../binary-parser.js';
 import is from '@sindresorhus/is';
 
-
 const leb128 = (input: number) => {
   const hex = input.toString(16);
   const ua = fromHexString(hex);
-  const big = leb.decodeSLEB128(ua)[0];
+  const big = leb.decodeULEB128(ua)[0];
   return Number(big);
 };
 
@@ -20,10 +19,10 @@ export const shortStr = Parser.start().nest({
   formatter: v => v.data,
 });
 
-export const oldLongStr = Parser.start().nest({
+export const longStr = Parser.start().nest({
   type: Parser.start()
-    .uint8('check', { formatter: i => leb128(i) })
-    .string('data', { length: 'check' }),
+    .uint16('length', { formatter: i => leb128(i) })
+    .string('data', { length: 'length' }),
   formatter: v => v.data
 });
 
@@ -38,16 +37,65 @@ export const timestamp = Parser.start().nest({
 
 export const undo = Parser.start().seek(-1);
 
-export const optStr = Parser.start().nest({
+export const usemask = Parser.start().nest({
   type: Parser.start()
     .uint8('fieldType')
-    .seek(4)
+    .seek(-1)
+    .choice('data', {
+      tag: 'fieldType',
+      choices: { 7: shortStr },
+      defaultChoice: emptyStr
+    }),
+  formatter: v => {
+    console.log(v);
+    return v.data ?? false;
+  }
+});
+
+
+export const varString = Parser.start().useContextVars(true).nest({
+  type: Parser.start()
+    .uint8('check', { assert: 6 })
+
+    // This is occasionally useful for debugging, but we discard it
+    // when formatting the final result.
+    .uint32le("id")
+
+    // We look ahead four bytes, using ULEB decoding to figure out
+    // how many bytes contain length data versus string data.
+    .buffer("offset", {
+      length: 4,
+      formatter: (b: Buffer) => leb.decodeULEB128(new Uint8Array(b))
+    })
+
+    // We back up by however much we overshot the 'length bytes'
+    .seek(function(...args) {
+      // @ts-ignore
+      const offset = (this as any).offset[1] - 4;
+      return offset;
+    })
+
+    // …And finally parse the string data itself.
+    .string('string', {
+      length: function () {
+        // @ts-ignore
+        const length = Number((this as any).offset[0]);
+        return length;
+      }
+    }),
+  formatter: function (data) {
+    return data.string;
+  }
+});
+
+export const optVarStr = Parser.start().useContextVars().nest({
+  type: Parser.start()
+    .uint8('fieldType').seek(-1)
     .choice('data', {
       tag: 'fieldType',
       choices: {
-        6: shortStr,
+        6: varString,
         9: emptyStr,
-        10: emptyStr, // Actually a WTF
       },
     }),
   formatter: v => {
@@ -59,17 +107,24 @@ export const optStr = Parser.start().nest({
   }
 });
 
-export const usemask = Parser.start().nest({
+export const optStr = Parser.start().useContextVars().nest({
   type: Parser.start()
     .uint8('fieldType')
+    .seek(2)
     .choice('data', {
       tag: 'fieldType',
-      choices: { 7: shortStr },
-      defaultChoice: undo
+      choices: {
+        6: Parser.start().seek(2).nest({ type: shortStr }),
+        9: Parser.start().seek(2).nest({ type: emptyStr }),
+        10: Parser.start().seek(5).nest({ type: shortStr }), // Actually a WTF
+      },
     }),
   formatter: v => {
-    console.log(v);
-    return v.data ?? false;
+    if (is.emptyObject(v.data)) {
+      return '';
+    } else {
+      return v.data;
+    }
   }
 });
 
@@ -87,35 +142,3 @@ export const anyField = Parser.start().nest({
   formatter: v => v.data,
 });
 
-export const longStr = Parser.start().useContextVars(true).nest({
-  // Check the first two bytes for length.
-  // If it's shorter than 255, seek by -1.
-  type: Parser.start()
-    .uint8('check', { formatter: i => 6 })
-    .seek(4)
-    .uint16("lookAhead", {
-      formatter: u => {
-        const ua = fromHexString(u.toString(16));
-        return leb.decodeSLEB128(ua);
-      }
-    }).seek(-1)
-    .string('prefix', {
-      length: function (data) {
-        const lebData = (this as any).lookAhead as [BigInt, Number];
-        if (lebData[1] === 2) {
-          return 0;
-        } else {
-          return 1;
-        }
-      }
-    })
-    .string('suffix', {
-      length: function (data) {
-        return Number((this as any).lookAhead[0]);
-      }
-    }),
-  formatter: function (data) {
-    const appended = data.prefix + data.suffix;
-    return appended;
-  }
-});
