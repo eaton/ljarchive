@@ -1,6 +1,6 @@
 import test from 'ava';
-import { base } from '../src/index.js';
+import { parseLJArchiveXml } from '../src/lja-xml.js';
 
 test('dummy test', t => {
-  t.is(base, 'Nothing to see here, folks.');
+  t.not(parseLJArchiveXml, undefined);
 });

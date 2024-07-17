@@ -24,22 +24,31 @@
   ],
   "scripts": {
     "run": "node --import=tsimp src/index.ts",
+    "demo": "node --import=tsimp src/test.ts",
     "build": "rm -rf dist; pkgroll --minify",
     "format": "prettier --config prettier.config.js 'src/**/*.ts' --write",
     "test": "ava"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eaton/base"
+    "url": "git+https://github.com/eaton/ljarchive"
   },
   "devDependencies": {
+    "@types/node": "^20.14.10",
     "ava": "^6.1.2",
     "pkgroll": "^2.0.2",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",
     "tsimp": "^2.0.11",
-    "@types/node": "^20.14.10",
-    "typedoc": "^0.26.4",
     "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@sindresorhus/is": "^7.0.0",
+    "@thi.ng/leb128": "^3.1.6",
+    "construct-js": "^1.0.1",
+    "dayjs": "^1.11.11",
+    "fast-xml-parser": "^4.4.0",
+    "fs-jetpack": "^5.1.0",
+    "zod": "^3.23.8"
   }
 }
