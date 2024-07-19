@@ -1,5 +1,6 @@
 import { Parser } from '../binary-parser.js';
 import { shortStr, timestamp, nullable, optVarStr, cBody, entityIdField } from './field-types.js';
+import { ticksToDate } from './ticks-to-datestring.js';
 
 const fileHeader = new Parser()
   .skip(22).nest('Meta', { type: shortStr })
@@ -16,49 +17,45 @@ const fileHeader = new Parser()
   });
 
 const options = new Parser()
-  .nest('Server', { type: nullable })
-  .nest('DefaultPicURL', { type: nullable })
-  .nest('FullName', { type: nullable })
-  .nest('UserName', { type: nullable })
-  .nest('Password', { type: nullable })
+  .nest('Server', { type: optVarStr })
+  .nest('DefaultPicURL', { type: optVarStr })
+  .nest('FullName', { type: optVarStr })
+  .nest('UserName', { type: optVarStr })
+  .nest('Password', { type: optVarStr })
   .nest('LastSynced', { type: timestamp })
-  .skip(18);
+  .skip(12);
 
 const mood = Parser.start()
-  .uint16('Check', { assert: 2056 })
   .nest('MoodID', { type: entityIdField })
-  .nest('Name', { type: nullable })
-  .seek(15)
+  .nest('Name', { type: optVarStr })
+  .nest('RelatedMoodID', { type: entityIdField })
+  .seek(9)
 
 const userPic = Parser.start()
-  .nest('Keyword', { type: nullable })
-  .nest('URL', { type: nullable })
+  .nest('Keyword', { type: optVarStr })
+  .nest('URL', { type: optVarStr })
   .seek(9);
 
 const user = Parser.start()
-  .uint16('Check', { assert: 2056 })
   .nest('UserID', { type: entityIdField })
   .nest('Name', { type: nullable })
   .seek(9);
 
 const event = Parser.start().useContextVars().nest({
   type: Parser.start()
-    .uint16('Check', { assert: 2056 })
     .nest('EntryID', { type: entityIdField })
-    .nest('LastMod', { type: timestamp })
-    .seek(6)
+    .nest('Date', { type: timestamp })
     .nest('Security', { type: nullable })
-    .seek(6)
-    .nest('Subject', { type: nullable })
+    .nest('CommunityID', { type: entityIdField })
+    .nest('Subject', { type: optVarStr })
     .nest('Body', { type: optVarStr })
     .nest('Unknown1', { type: nullable })
     .nest('CustomMood', { type: nullable })
-    .seek(2)
     .nest('MoodID', { type: entityIdField })
-    .nest('Music', { type: nullable })
+    .nest('Music', { type: optVarStr })
     .nest('Preformatted', { type: nullable })
     .nest('NoComments', { type: nullable })
-    .nest('UserPic', { type: nullable })
+    .nest('UserPic', { type: optVarStr })
     .nest('Unknown2', { type: nullable })
     .nest('Backdated', { type: nullable })
     .nest('NoEmail', { type: nullable })
@@ -69,24 +66,20 @@ const event = Parser.start().useContextVars().nest({
     .nest('SI', { type: nullable })
     .nest('SU', { type: nullable })
     .nest('LastMod', { type: timestamp })
-    .seek(15),
+    .seek(9),
 });
 
 const comments = Parser.start().useContextVars().nest({
   type: Parser.start()
-    .uint16('Check', { assert: 2056 })
     .nest('CommentID', { type: entityIdField })
-    .seek(2)
     .nest('UserID', { type: entityIdField })
     .nest('UserName', { type: nullable })
-    .seek(2)
     .nest('EntryID', { type: entityIdField })
-    .seek(2)
     .nest('ParentID', { type: entityIdField })
-    .nest('Body', { type: cBody })
-    .nest('Subject', { type: nullable })
+    .nest('Body', { type: optVarStr })
+    .nest('Subject', { type: optVarStr })
     .nest('Date', { type: timestamp })
-    .seek(15),
+    .seek(9),
 });
 
 export function parseLjArchive(input: Buffer) {

@@ -1,7 +1,7 @@
 import * as leb from '@thi.ng/leb128';
 import { Parser } from '../binary-parser.js';
 import is from '@sindresorhus/is';
-
+import { ticksToDate } from './ticks-to-datestring.js';
 const DOTNET_EPOCH_OFFSET = 856799194;
 
 const leb128 = (input: number) => {
@@ -27,12 +27,16 @@ export const bool = Parser.start().bit8('mask', { formatter: m => m.mask === 1 }
 export const bitMask16 = Parser.start().bit16('mask');
 
 export const entityIdField = Parser.start().nest({
-  type: Parser.start().uint32le('data'),
+  type: Parser.start()
+    .uint16('Check', { assert: 2056 })
+    .uint32le('data'),
   formatter: i => i.data || undefined
 })
 
 export const timestamp = Parser.start().nest({
-  type: Parser.start().uint32be('data', { formatter: (t) => new Date((t + DOTNET_EPOCH_OFFSET) * 1000) }),
+  type: Parser.start()
+    .uint16le('type', { assert: 3336 })
+    .uint64le('data', { formatter: (t) => ticksToDate(t) }),
   formatter: v => v.data
 });
 
