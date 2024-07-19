@@ -23,9 +23,7 @@ export const shortStr = Parser.start().nest({
 
 export const emptyStr = Parser.start();
 
-export const bool = Parser.start().bit8('mask', { formatter: m => m.mask === 1 }).seek(1);
-
-export const bitMask16 = Parser.start().bit16('mask');
+export const bool = Parser.start().seek(1).bit8('mask', { formatter: m => m.mask === 1 });
 
 export const entityIdField = Parser.start().nest({
   type: Parser.start()
@@ -97,9 +95,6 @@ export const optVarStr = Parser.start().useContextVars().nest({
   }
 });
 
-export const cBody = optVarStr;
-
-
 export const nullable = Parser.start().nest({
   type: Parser.start()
     .uint8('fieldType')
@@ -108,7 +103,7 @@ export const nullable = Parser.start().nest({
       choices: {
         6: Parser.start().seek(4).nest({ type: shortStr }),
         7: shortStr,
-        8: bool,  // bitmask field
+        8: bool,
         9: Parser.start().seek(4), // Empty variable-length field
       },
     }),

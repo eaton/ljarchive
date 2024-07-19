@@ -1,10 +1,12 @@
 import { Parser } from '../binary-parser.js';
 import { shortStr, timestamp, nullable, optVarStr, entityIdField } from './field-types.js';
 
-const bookendRecord = Parser.start()
-  .uint8("Marker", { assert: 16 })
-  .uint32le("Unknown")
-  .uint32le("Unknown")
+const sectionStart = Parser.start().nest({
+  type: Parser.start()
+    .uint8("Marker", { assert: 16 })
+    .uint32le("RecordNumber")
+    .uint32le("FieldCount"),
+})
 
 const fileHeader = Parser.start()
   .skip(22).nest('Meta', { type: shortStr })
@@ -16,7 +18,7 @@ const fileHeader = Parser.start()
   .saveOffset("offset")
   .seek(function (...args) {
     // @ts-ignore
-    const offset = 29165 - (this as any).offset;
+    const offset = 29156 - (this as any).offset;
     return offset;
   });
 
@@ -28,26 +30,26 @@ const options = Parser.start()
   .nest('Password', { type: optVarStr })
   .nest('LastSynced', { type: timestamp })
   .nest('Unknown', { type: nullable })
-  .skip(9);
 
 const mood = Parser.start()
+  .nest("Meta", { type: sectionStart })
   .nest('MoodID', { type: entityIdField })
   .nest('Name', { type: optVarStr })
   .nest('ParentID', { type: entityIdField })
-  .seek(9)
 
 const userPic = Parser.start()
+  .nest("Meta", { type: sectionStart })
   .nest('Keyword', { type: optVarStr })
   .nest('URL', { type: optVarStr })
-  .seek(9);
 
 const user = Parser.start()
+  .nest({ type: sectionStart })
   .nest('UserID', { type: entityIdField })
   .nest('Name', { type: optVarStr })
-  .seek(9);
 
 const event = Parser.start().nest({
   type: Parser.start()
+    .nest("Meta", { type: sectionStart })
     .nest('EntryID', { type: entityIdField })
     .nest('Date', { type: timestamp })
     .nest('Security', { type: nullable })
@@ -70,11 +72,11 @@ const event = Parser.start().nest({
     .nest('SyndicationID', { type: nullable })
     .nest('SyndicationURL', { type: nullable })
     .nest('LastMod', { type: timestamp })
-    .nest('Close', { type: bookendRecord })
 });
 
 const comments = Parser.start().useContextVars().nest({
   type: Parser.start()
+    .nest("Meta", { type: sectionStart })
     .nest('CommentID', { type: entityIdField })
     .nest('UserID', { type: entityIdField })
     .nest('UserName', { type: nullable })
@@ -83,12 +85,12 @@ const comments = Parser.start().useContextVars().nest({
     .nest('Body', { type: optVarStr })
     .nest('Subject', { type: optVarStr })
     .nest('Date', { type: timestamp })
-    .seek(9),
 });
 
 export function parseLjArchive(input: Buffer) {
   const journal = Parser.start()
     .nest('header', { type: fileHeader })
+    .nest('OptionStart', { type: sectionStart })
     .nest('options', { type: options })
     .array('moods', { type: mood, length: 132 })
     .array('userPics', { type: userPic, length: 3 })
