@@ -24,6 +24,7 @@ export const shortStr = Parser.start().nest({
 export const emptyStr = Parser.start();
 
 export const bool = Parser.start().bit8('mask', { formatter: m => m.mask === 1 }).seek(1);
+
 export const bitMask16 = Parser.start().bit16('mask');
 
 export const entityIdField = Parser.start().nest({
@@ -41,21 +42,6 @@ export const timestamp = Parser.start().nest({
 });
 
 export const undo = Parser.start().seek(-1);
-
-export const usemask = Parser.start().nest({
-  type: Parser.start()
-    .uint8('fieldType')
-    .seek(-1)
-    .choice('data', {
-      tag: 'fieldType',
-      choices: { 7: shortStr },
-      defaultChoice: emptyStr
-    }),
-  formatter: v => {
-    console.log(v);
-    return v.data ?? false;
-  }
-});
 
 export const varString = Parser.start().useContextVars(true).nest({
   type: Parser.start()
