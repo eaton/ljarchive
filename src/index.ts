@@ -5,7 +5,7 @@ let buffer = jetpack.read('./input/archive.lja', 'buffer');
 
 if (buffer) {
   const parsed = parseLjArchive(buffer);
-  // console.log(parsed.events.map((e: any) => ({ subj: e.Subject, music: e.Music })));
+  jetpack.dir('./output').write('livejournal.json', parsed, { jsonIndent: 2 });
 }
 
 console.log('done');

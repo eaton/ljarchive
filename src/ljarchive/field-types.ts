@@ -2,6 +2,8 @@ import * as leb from '@thi.ng/leb128';
 import { Parser } from '../binary-parser.js';
 import is from '@sindresorhus/is';
 
+const DOTNET_EPOCH_OFFSET = 856799194;
+
 const leb128 = (input: number) => {
   const hex = input.toString(16);
   const ua = fromHexString(hex);
@@ -16,22 +18,21 @@ const fromHexString = (hexString: string) =>
 
 export const shortStr = Parser.start().nest({
   type: Parser.start().uint8('length').string('data', { length: 'length' }),
-  formatter: v => v.data,
-});
-
-export const longStr = Parser.start().nest({
-  type: Parser.start()
-    .uint16('length', { formatter: i => leb128(i) })
-    .string('data', { length: 'length' }),
-  formatter: v => v.data
+  formatter: v => v.data || undefined,
 });
 
 export const emptyStr = Parser.start();
 
-export const bitMask = Parser.start().bit8('mask').seek(1);
+export const bool = Parser.start().bit8('mask', { formatter: m => m.mask === 1 }).seek(1);
+export const bitMask16 = Parser.start().bit16('mask');
+
+export const entityIdField = Parser.start().nest({
+  type: Parser.start().uint32le('data'),
+  formatter: i => i.data || undefined
+})
 
 export const timestamp = Parser.start().nest({
-  type: Parser.start().uint32be('data', { formatter: t => new Date((t + 946684800) * 1000) }),
+  type: Parser.start().uint32be('data', { formatter: (t) => new Date((t + DOTNET_EPOCH_OFFSET) * 1000) }),
   formatter: v => v.data
 });
 
@@ -51,7 +52,6 @@ export const usemask = Parser.start().nest({
     return v.data ?? false;
   }
 });
-
 
 export const varString = Parser.start().useContextVars(true).nest({
   type: Parser.start()
@@ -95,50 +95,39 @@ export const optVarStr = Parser.start().useContextVars().nest({
       tag: 'fieldType',
       choices: {
         6: varString,
-        9: emptyStr,
+        9: Parser.start().seek(5),
       },
     }),
   formatter: v => {
     if (is.emptyObject(v.data)) {
-      return '';
+      return undefined;
     } else {
       return v.data;
     }
   }
 });
 
-export const optStr = Parser.start().useContextVars().nest({
-  type: Parser.start()
-    .uint8('fieldType')
-    .seek(2)
-    .choice('data', {
-      tag: 'fieldType',
-      choices: {
-        6: Parser.start().seek(2).nest({ type: shortStr }),
-        9: Parser.start().seek(2).nest({ type: emptyStr }),
-        10: Parser.start().seek(5).nest({ type: shortStr }), // Actually a WTF
-      },
-    }),
-  formatter: v => {
-    if (is.emptyObject(v.data)) {
-      return '';
-    } else {
-      return v.data;
-    }
-  }
-});
+export const cBody = optVarStr;
 
-export const anyField = Parser.start().nest({
+
+export const nullable = Parser.start().nest({
   type: Parser.start()
     .uint8('fieldType')
     .choice('data', {
       tag: 'fieldType',
       choices: {
+        6: Parser.start().seek(4).nest({ type: shortStr }),
         7: shortStr,
-        8: bitMask,  // bitmask field
-        9: emptyStr, // Empty variable-length field
+        8: bool,  // bitmask field
+        9: Parser.start().seek(4), // Empty variable-length field
       },
     }),
-  formatter: v => v.data,
+  formatter: v => {
+    if (is.emptyObject(v.data)) {
+      return undefined;
+    } else {
+      return v.data;
+    }
+  }
 });
 

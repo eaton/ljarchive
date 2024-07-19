@@ -1,3 +1,3 @@
 import * as leb from '@thi.ng/leb128';
 
-console.log(leb.decodeSLEB128(new Uint8Array([50, 105])));
+console.log(leb.decodeULEB128(new Uint8Array([157, 15])));
