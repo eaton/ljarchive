@@ -1,6 +1,6 @@
+import is from '@sindresorhus/is';
 import * as leb from '@thi.ng/leb128';
 import { Parser } from '../binary-parser.js';
-import is from '@sindresorhus/is';
 import { ticksToDate } from './ticks-to-date.js';
 
 export const bool = Parser.start().nest({
@@ -48,7 +48,7 @@ export const varStr = Parser.start().useContextVars(true).nest({
       }
     }),
   formatter: function (data) {
-    return data.string;
+    return data.string || undefined;
   }
 });
 
@@ -84,3 +84,10 @@ export const recordCount = Parser.start().nest({
   formatter: data => (data as { length: number }).length
 });
 
+export const recordHeader = Parser.start().nest({
+  type: Parser.start()
+    .uint8("marker", { assert: 16 })
+    .uint32le("recordId")
+    .uint32le("fieldCount"),
+  formatter: () => ({})
+})

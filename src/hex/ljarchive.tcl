@@ -98,7 +98,7 @@ proc recordStart {args} {
   if { [llength $args] == 0 } {
     move 8
   } else {
-    section -collapsed "Meta" {
+    section -collapsed "meta" {
       uint32 "RecordID"
       uint32 "FieldCount"
     }
@@ -110,12 +110,12 @@ proc recordStart {args} {
 # this meta/header section is likely to choke first. So, while it
 # doesn't add much other than record counts, it's a useful canary
 # in the metaphorical coal mine.
-section "Meta" {
+section "header" {
   requires 0 "0001000000FFFFFFFF01000000000000000C02000000"
   move 22 
-  shortStr "Assembly"
+  shortStr "assembly"
   move 5
-  shortStr "ClassName"
+  shortStr "className"
 
   set classCount [uint32]
   for {set i 1} {$i <= $classCount} {incr i} {
@@ -140,91 +140,91 @@ section "Meta" {
   set entryCount [recordCount]
   set commentCount [recordCount]
 
-  entry "Moods" $moodCount
-  entry "UserPics" $userPicCount
-  entry "Users" $userCount
-  entry "Entries" $entryCount
-  entry "Comments" $commentCount
+  entry "moods" $moodCount
+  entry "userpics" $userPicCount
+  entry "users" $userCount
+  entry "events" $entryCount
+  entry "comments" $commentCount
 }
 
-section "Options" {
+section "options" {
   recordStart
-  varStr "ServerURL"
-  varStr "DefaultPicURL"
-  varStr "FullName"
-  varStr "UserName"
-  varStr "HPassword"
-  timestamp "Last Sync"
-  bool "Unknown"
+  varStr "serverURL"
+  varStr "defaultPicURL"
+  varStr "fullName"
+  varStr "userName"
+  varStr "password"
+  timestamp "lastSynced"
+  bool "unknown"
 }
 
-section -collapsed "Moods" {
+section -collapsed "moods" {
   for {set m 1} {$m <= $moodCount} {incr m} {
     recordStart
-    entityID "MoodID"
-    varStr "Name"
-    entityID "NextMoodID"
+    entityID "id"
+    varStr "name"
+    entityID "parentId"
   }
 }
 
-section -collapsed "UserPics" {
+section -collapsed "userpics" {
   for {set u 1} {$u <= $userPicCount} {incr u} {
     recordStart
-    varStr "Keyword"
-    varStr "URL"
+    varStr "keyword"
+    varStr "url"
   }
 }
 
-section -collapsed "Users" {
+section -collapsed "users" {
   for {set u 1} {$u <= $userCount} {incr u} {
     recordStart
-    entityID "UserID"
-    varStr "Name"
+    entityID "id"
+    varStr "name"
   }
 }
 
-section -collapsed "Events" {
+section -collapsed "events" {
   for {set u 1} {$u <= $entryCount} {incr u} {
-	  section "Event $u" {
+	  section "event $u" {
       recordStart
-      entityID "ID"
-      timestamp "Date"
-      varStr "Security"
-      entityID "Audience"
-      varStr "Subject"
-      varStr "Body"
-      varStr "Unknown"
-      varStr "Custom Mood"
-      entityID MoodID
-      varStr "Music"
-      bool "Preformatted"
-      bool "No Comments"
-      varStr "UserPic"
-      bool "Unknown Bool"
-      bool "Backdated"
-      bool "No Email"
-      bool "Unknown"
-      entityID "Revisions"
-      entityID "CommentAlter"
-      varStr "Syndication URL"
-      varStr "Syndication ID"
-      timestamp "LastMod"
+      entityID "id"
+      timestamp "date"
+      varStr "security"
+      entityID "audience"
+      varStr "subject"
+      varStr "body"
+      varStr "unknown1"
+      varStr "mood"
+      entityID "moodId"
+      varStr "music"
+      bool "isPreformatted"
+      bool "noComments"
+      varStr "userPic"
+      bool "unknown2"
+      bool "isBackdated"
+      bool "noEmail"
+      bool "unknown3"
+      entityID "revisions"
+      entityID "commentAlter"
+      varStr "syndicationUrl"
+      varStr "syndicationId"
+      timestamp "lastModified"
 	  }
 	}
 }
 
-section -collapsed "Comments" {
+section -collapsed "comments" {
   for {set u 1} {$u <= $commentCount} {incr u} {
-    section -collapsed "Comment $u" {
+    section -collapsed "comment $u" {
       recordStart
-      entityID "CommentID"
-      entityID "UserID"
-      varStr "UserName"
-      entityID "EntryID"
-      entityID "ParentID"
-      varStr "Body"
-      varStr "Subject"
-      timestamp "Date"
+      entityID "id"
+      entityID "userID"
+      varStr "userName"
+      entityID "eventId"
+      entityID "parentId"
+      varStr "body"
+      varStr "subject"
+      timestamp "date"
     }
   }
 }

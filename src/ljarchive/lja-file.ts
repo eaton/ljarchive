@@ -1,10 +1,5 @@
 import { Parser } from '../binary-parser.js';
-import { bool, timestamp, optStr, varStr, entityIdField, recordCount } from './field-types.js';
-
-const sectionStart = Parser.start().seek(9);
-//  .uint8("Marker", { assert: 16 })
-//  .uint32le("RecordNumber")
-//  .uint32le("FieldCount")
+import { bool, timestamp, optStr, varStr, entityIdField, recordCount, recordHeader } from './field-types.js';
 
 const fileHeader = Parser.start()
   // 0x00010000 00FFFFFF FF010000 00000000 000C0200 00
@@ -19,15 +14,24 @@ const fileHeader = Parser.start()
   .array('tableTypes', { type: varStr, length: 'tableCount' })
   .seek(4)
   .array('tableSpacer', { type: optStr, length: 'tableCount' })
-  .nest('optionCount', { type: recordCount })
-  .nest('moodCount', { type: recordCount })
-  .nest('userPicCount', { type: recordCount })
-  .nest('userCount', { type: recordCount })
-  .nest('entryCount', { type: recordCount })
-  .nest('commentCount', { type: recordCount });
+  .nest('optionsRows', { type: recordCount })
+  .nest('moodsRows', { type: recordCount })
+  .nest('userpicsRows', { type: recordCount })
+  .nest('usersRows', { type: recordCount })
+  .nest('eventsRows', { type: recordCount })
+  .nest('commentsRows', { type: recordCount });
   
+const fileFooter = Parser.start()
+  .seek(5) // 0x04 CB170000
+  .nest('serializer', { type: varStr })
+  .seek(4) // 0x03000000
+  .nest('data', { type: varStr })
+  .nest('unity', { type: varStr })
+  .nest('assembly', { type: varStr })
+  .seek(4) // 0x01000108 0A020000 0009922C 00000B
+
 const options = Parser.start()
-  .nest({ type: sectionStart })
+  .nest({ type: recordHeader })
   .nest('server', { type: optStr })
   .nest('defaultUserPic', { type: optStr })
   .nest('fullName', { type: optStr })
@@ -37,24 +41,24 @@ const options = Parser.start()
   .nest('unknown', { type: bool })
 
 const mood = Parser.start()
-  .nest({ type: sectionStart })
+  .nest({ type: recordHeader })
   .nest('id', { type: entityIdField })
   .nest('name', { type: optStr })
-  .nest('parent', { type: entityIdField })
+  .nest('parentId', { type: entityIdField })
 
 const userPic = Parser.start()
-  .nest({ type: sectionStart })
+  .nest({ type: recordHeader })
   .nest('keyword', { type: optStr })
   .nest('url', { type: optStr })
 
 const user = Parser.start()
-  .nest({ type: sectionStart })
+  .nest({ type: recordHeader })
   .nest('id', { type: entityIdField })
   .nest('name', { type: optStr })
 
 const event = Parser.start().nest({
   type: Parser.start()
-    .nest({ type: sectionStart })
+    .nest({ type: recordHeader })
     .nest('id', { type: entityIdField })
     .nest('date', { type: timestamp })
     .nest('security', { type: optStr })
@@ -79,30 +83,51 @@ const event = Parser.start().nest({
     .nest('lastModified', { type: timestamp })
 });
 
-const comments = Parser.start().useContextVars().nest({
+const comment = Parser.start().useContextVars().nest({
   type: Parser.start()
-    .nest({ type: sectionStart })
+    .nest({ type: recordHeader })
     .nest('id', { type: entityIdField })
     .nest('userId', { type: entityIdField })
     .nest('userName', { type: optStr })
-    .nest('entryId', { type: entityIdField })
+    .nest('eventId', { type: entityIdField })
     .nest('parentId', { type: entityIdField })
     .nest('body', { type: optStr })
     .nest('subject', { type: optStr })
     .nest('date', { type: timestamp })
 });
 
-export function parseLjArchive(input: Buffer) {
-  const journal = Parser.start()
-    .nest('header', { type: fileHeader })
-    .nest('options', { type: options })
-    .array('moods', { type: mood, length: 132 })
-    .array('userPics', { type: userPic, length: 3 })
-    .array('users', { type: user, length: 196 })
-    .array('events', { type: event, length: 1223 }) // 1223
-    .array('comments', { type: comments, length: 4188 }); // 4188
-
-  const output = journal.parse(input)
-  console.log(output);
-  return output;
-}
+export const ljaFile = Parser.start()
+  .endianess('little')
+  .nest('header', { type: fileHeader })
+  .nest('options', { type: options })
+  .array('moods', {
+    type: mood, length: function () {
+      // @ts-ignore
+      return (this as { header: { moodsRows: number } }).header.moodsRows;
+    }
+  })
+  .array('userPics', {
+    type: userPic, length: function () {
+      // @ts-ignore
+      return (this as { header: { userpicsRows: number } }).header.userpicsRows;
+    }
+  })
+  .array('users', {
+    type: user, length: function () {
+      // @ts-ignore
+      return (this as { header: { usersRows: number } }).header.usersRows;
+    }
+  })
+  .array('events', {
+    type: event, length: function () {
+      // @ts-ignore
+      return (this as { header: { eventsRows: number } }).header.eventsRows;
+    }
+  })
+  .array('comments', {
+    type: comment, length: function () {
+      // @ts-ignore
+      return (this as { header: { commentsRows: number } }).header.commentsRows;
+    }
+  })
+  .nest('footer', { type: fileFooter });
