@@ -13,6 +13,5 @@ function decodeVarint(uint8Array: Uint8Array, pos: number): number {
     number += (byte & 127) << shift;
     shift += 7;
   }
-
   return number;
 }

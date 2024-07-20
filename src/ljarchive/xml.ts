@@ -22,7 +22,9 @@ const comment = z.object({
   eventtime: pdate,
   event: z.string(),
   author,
-});
+}).transform(e => ({
+  
+}));
 
 const entry = z.object({
   itemid: z.number(),
@@ -33,7 +35,9 @@ const entry = z.object({
   current_mood: z.string().optional(),
   allowmask: z.number(),
   comment: oneOrMany(comment).optional(),
-});
+}).transform(e => ({
+
+}));
 
 const xmlFile = z.object({
   livejournal: z.object({

@@ -1,5 +1,5 @@
 import jetpack from 'fs-jetpack';
-import { parseLjArchive } from './ljarchive/parse.js';
+import { parseLjArchive } from './ljarchive/parser.js';
 
 let buffer = jetpack.read('./input/archive.lja', 'buffer');
 

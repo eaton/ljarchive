@@ -15,5 +15,6 @@ export function ticksToDate(input: number | string | bigint | string) {
   }
 
   // output the result in something the human understands
+  if (millisecondsSinceEpoch === 0n) return undefined;
   return new Date(Number(millisecondsSinceEpoch));
 };
