@@ -20,8 +20,8 @@
 # 0x09 - 4-byte FieldID for an empty variable-length string
 # 0x10 - Record header (see recordStart)
 
-# LJArchive stores its strings in vanilla UTF, but encodes the length
-# as LEB128 ints. This is baffling when trying to figure out the format,
+# LJArchive stores its strings in vanilla UTF, prefixed by the length
+# in LEB128. This is baffling when trying to figure out the file structure,
 # but ends up pretty elegant in the end: once a string field is found,
 # read LEB bytes until something with the high bit appears (aka, utf8
 # text). No other fancy footwork is necessary to distinguish length
@@ -49,7 +49,6 @@ proc shortStr {label} {
   }
 }
 
-# The catch-all parser for string fields.
 proc varStr {label} {
   set pre [uint8]
   set id [uint32]
@@ -80,6 +79,7 @@ proc entityID {label} {
 }
 
 proc recordCount {} {
+  # Mark is 07
   set mark [uint8]
   set id [uint8]
   set spacer [uint64]
@@ -105,6 +105,11 @@ proc recordStart {args} {
   }
 }
 
+# It's highly likely that this will break with archive files saved by
+# anything other than LJArchive 0.9.4.3. If things change TOO much,
+# this meta/header section is likely to choke first. So, while it
+# doesn't add much other than record counts, it's a useful canary
+# in the metaphorical coal mine.
 section "Meta" {
   requires 0 "0001000000FFFFFFFF01000000000000000C02000000"
   move 22 
