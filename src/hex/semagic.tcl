@@ -6,16 +6,16 @@
 # A length value of 0xFF indicates that a two-byte length follows.
 # Strings themselves are utf16le encoded.
 proc semagic_str {label} {
-    move 3
-    set type [uint8]
-    if { $type == 00 } {
-    } elseif { $type == 255 } {
-        set blen [expr [uint16] * 2]
-        str $blen "utf16le" $label
-    } else {
-        set blen [expr $type * 2]
-        str $blen "utf16le" $label
-    }
+move 3
+  set type [uint8]
+  if { $type == 00 } {
+  } elseif { $type == 255 } {
+    set blen [expr [uint16] * 2]
+    str $blen "utf16le" $label
+  } else {
+    set blen [expr $type * 2]
+    str $blen "utf16le" $label
+  }
 }
 
 requires 0 "FFFF"

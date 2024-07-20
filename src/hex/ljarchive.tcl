@@ -1,19 +1,31 @@
 
 # ljarchive.tcl
 # 2024-07-19 | eaton | Initial implementation
+# https://sourceforge.net/projects/ljarchive/
 
-proc recordCount {} {
-  set mark [uint8]
-  set id [uint8]
-  set spacer [uint64]
-  set len [uint32]
-  set five [uint8]
-  for {set i 1} {$i <= $len} {incr i} {
-    move 5
-  }
-  return $len
-}
+# LJArchive is basically just the .Net 3.5 Binary serializer in action.
+# Figuring that out simplified quite a bit of subsequent testing, but it
+# also means this is incredibly vulnerable to minor version updates that
+# change the internal storage format of any field. This was built against
+# data from the 0.9.4.3 release; anything else is a Buyer Beware kind of
+# situation.
 
+# Field type prefix bytes
+#
+# 0x06 - 4-byte Field ID, then a variable-length string
+# 0x07 - Internal record metadata (see recordCount)
+# 0x0801 - Boolean (single byte with 0 or 1)
+# 0x0808 - 4-byte EntityID
+# 0x080D - 8-byte timestamp in ticks
+# 0x09 - 4-byte FieldID for an empty variable-length string
+# 0x10 - Record header (see recordStart)
+
+# LJArchive stores its strings in vanilla UTF, but encodes the length
+# as LEB128 ints. This is baffling when trying to figure out the format,
+# but ends up pretty elegant in the end: once a string field is found,
+# read LEB bytes until something with the high bit appears (aka, utf8
+# text). No other fancy footwork is necessary to distinguish length
+# data from text data. 
 proc reverse_leb128 {} {
   set start [pos]
   set byte 128
@@ -24,6 +36,8 @@ proc reverse_leb128 {} {
   return $number
 }
 
+# A handful of strings in the header are variable-length but
+# not actually data fields, and require special handling.
 proc shortStr {label} {
   set len [reverse_leb128]
   if { $len > 0 } {
@@ -35,8 +49,8 @@ proc shortStr {label} {
   }
 }
 
+# The catch-all parser for string fields.
 proc varStr {label} {
-  # Mark is "06" for populated or "09" for empty
   set pre [uint8]
   set id [uint32]
   if { $pre == 6 } {
@@ -63,6 +77,18 @@ proc entityID {label} {
   # Mark is "0808"
   set mark [uint16]
   uint32 $label
+}
+
+proc recordCount {} {
+  set mark [uint8]
+  set id [uint8]
+  set spacer [uint64]
+  set len [uint32]
+  set five [uint8]
+  for {set i 1} {$i <= $len} {incr i} {
+    move 5
+  }
+  return $len
 }
 
 proc recordStart {args} {
