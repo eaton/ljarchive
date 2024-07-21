@@ -1,6 +1,9 @@
 import { Parser } from '../binary-parser.js';
-import { bool, timestamp, optStr, varStr, entityIdField, recordCount, recordHeader } from './field-types.js';
+import { optStr, varStr, bool, timestamp, entityIdField, recordCount, recordHeader } from './field-types.js';
 
+/**
+ * This header block is mostly chaff, but contains useful metadata about how many of each record type are contained in the file.
+ */
 const fileHeader = Parser.start()
   // 0x00010000 00FFFFFF FF010000 00000000 000C0200 00
   .seek(22)
@@ -20,7 +23,10 @@ const fileHeader = Parser.start()
   .nest('usersRows', { type: recordCount })
   .nest('eventsRows', { type: recordCount })
   .nest('commentsRows', { type: recordCount });
-  
+
+/**
+ * No important data, but a useful checksum to ensure we didn't drift off course somewhere along the line.
+ */
 const fileFooter = Parser.start()
   .seek(5) // 0x04 CB170000
   .nest('serializer', { type: varStr })
@@ -30,6 +36,10 @@ const fileFooter = Parser.start()
   .nest('assembly', { type: varStr })
   .seek(4) // 0x01000108 0A020000 0009922C 00000B
 
+
+/**
+ * Account login and syncing information.
+ */
 const options = Parser.start()
   .nest({ type: recordHeader })
   .nest('server', { type: optStr })
@@ -40,22 +50,38 @@ const options = Parser.start()
   .nest('lastSynced', { type: timestamp })
   .nest('unknown', { type: bool })
 
+
+/**
+ * A list of Livejournal's standard moods; interestingly, there's a hierarchy.
+ */
 const mood = Parser.start()
   .nest({ type: recordHeader })
   .nest('id', { type: entityIdField })
   .nest('name', { type: optStr })
   .nest('parentId', { type: entityIdField })
 
+  
+/**
+ * A curiously incomplete list of user pictures associated with the account.
+ */
 const userPic = Parser.start()
   .nest({ type: recordHeader })
   .nest('keyword', { type: optStr })
   .nest('url', { type: optStr })
 
+  
+/**
+ * A list of all the users who've commented on this account's posts.
+ */
 const user = Parser.start()
   .nest({ type: recordHeader })
   .nest('id', { type: entityIdField })
   .nest('name', { type: optStr })
 
+
+/**
+ * The meat: An array of Events, aka journal entries.
+ */
 const event = Parser.start().nest({
   type: Parser.start()
     .nest({ type: recordHeader })
@@ -83,6 +109,9 @@ const event = Parser.start().nest({
     .nest('lastModified', { type: timestamp })
 });
 
+/**
+ * A flat list of comments with the IDs of the entries they correspond to, and the parent comments they are (optionally) replying to.
+ */
 const comment = Parser.start().useContextVars().nest({
   type: Parser.start()
     .nest({ type: recordHeader })

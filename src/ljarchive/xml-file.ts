@@ -1,7 +1,12 @@
 import dayjs from 'dayjs';
 import { X2jOptions, XMLParser } from 'fast-xml-parser';
 import { z } from 'zod';
-import { oneOrMany } from './one-or-many.js';
+
+export function oneOrMany<T extends z.ZodTypeAny>(schema: T) {
+  return schema
+    .or(z.array(schema))
+    .transform(i => (i !== undefined && Array.isArray(i) ? i : [i]));
+}
 
 export function parseLJArchiveXml(input: string, options: X2jOptions = {}) {
   const parser = new XMLParser(options);

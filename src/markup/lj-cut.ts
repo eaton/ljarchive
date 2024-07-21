@@ -22,16 +22,7 @@
  * pre <lj-cut text="text">hidden</lj-cut> post
  */
 
-const patterns = {
-  cutWrapper: /<lj-cut\s+text=['"]?([^'">]*)['"]?>(.+)<\/lj-cut>/gi, // <lj-cut text="cut text">Hidden content</lj-cut>
-  cutWrapperNoText: /<lj-cut[^>]*>(.+)<\/lj-cut>/gi, // <lj-cut>Hidden content</lj-cut>
-  cutClosed: /<lj-cut\s+text=['"]?([^'">]*)['"]?[^>]*><\/lj-cut>/gi, // <lj-cut text="cut text"></lj-cut>
-  cutClosedNoText: /<lj-cut[^>]*><\/lj-cut>/gi, // <lj-cut></lj-cut>
-  cutSelfClosing: /<lj-cut\s+text=['"]?([^'">]*)['"]?[^>]*>/gi, // <lj-cut text="cut text">
-  cutSelfClosingNoText: /<lj-cut[^>]*>/gi, // <lj-cut>
-};
-
-type CutResults = {
+export type CutResults = {
   /**
    * Event markup appearing before the lj-cut tag. If no cut tag is used, only this value will be populated.
    */
@@ -53,35 +44,46 @@ type CutResults = {
   postCut?: string;
 };
 
-/**
- * Generate an event teaser from an entry with lj-cut tags.
- *
- * There are a couple of permutations that make handling cut tags in an output-agnostic manner difficult;
- */
-function cutTeaser(markup: string) {
-  const wrapperReplacement = '<span class="lj-cut">$1</span>';
-  const wrapperNoTextReplacement = '<span class="lj-cut" />';
-  const placeholder = '\ufeff';
-
-  return markup
-    .replace(patterns.cutWrapper, 'wrapperReplacement') // Replace wrapper with text
-    .replace(patterns.cutWrapperNoText, wrapperNoTextReplacement + placeholder) // Replace wrapper with text
-    .replace(patterns.cutSelfClosing, wrapperReplacement + placeholder) // Replace breaker with placeholder
-    .replace(patterns.cutClosedNoText, wrapperNoTextReplacement + placeholder) // Replace annotated breaker with text & placeholder
-    .replace(patterns.cutClosed, wrapperReplacement + placeholder) // Replace annotated breaker with text & placeholder
-    .replace(patterns.cutSelfClosingNoText, wrapperNoTextReplacement + placeholder) // Replace breaker with placeholder
-    .split(placeholder)[0]; // Discard post-placeholder text
-}
 
 /**
- * Generate a full post body from an entry with lj-cut tags.
+ * Given a markup string, searches for various permutations of the `<lj-cut>`
+ * tag and returns an object with preCut, cutText, hiddenText, and postCut
+ * properties. These can be assembled into a fresh markup string (say, wrapping
+ * the hidden text in a collapsing box or using an `<a>` tag to link to the
+ * full page for a post). 
  */
-function cutBody(markup: string) {
-  const wrapperReplacement = '<span class="lj-cut expanded">$1</span>';
-  const wrapperNoTextReplacement = '<span class="lj-cut expanded" />';
+export function parseCutTag(markup: string, trim = false): CutResults {
+  const cutExp = /<lj-cut(?:\s+text=([^>]*))?>/is;
+  const closeExp = /<\/lj-cut>/is;
 
-  return markup
-    .replace(patterns.cutWrapperNoText, wrapperReplacement) // Remove cut wrapper
-    .replace(patterns.cutClosedNoText, wrapperNoTextReplacement) // Remove cut breaker
-    .replace(patterns.cutSelfClosingNoText, wrapperNoTextReplacement); // Remove cut breaker
+  let cut = cutExp.exec(markup) ?? undefined;
+  let close = closeExp.test(markup);
+
+  const output: CutResults = {};
+
+  if (!cut) {
+    output.preCut = trim ? markup.trim() : markup
+  } else {
+    let cutText = cut[1]?.replaceAll(/(^['"]|['"]$)/g, '');
+    let [preCut, postCutRaw] = markup.split(cut[0]);
+
+    let hiddenText: string | undefined = undefined;
+    let postCut: string | undefined = undefined;
+    if (closeExp.test(postCutRaw)) {
+      [hiddenText, postCut] = postCutRaw.split(closeExp);
+    } else {
+      postCut = postCutRaw;
+    }
+    
+    preCut = trim ? preCut?.trim() : preCut;
+    cutText = trim ? cutText?.trim() : cutText;
+    hiddenText = trim ? hiddenText?.trim() : hiddenText;
+    postCut = trim ? postCut?.trim() : postCut;
+
+    if (preCut) output.preCut = preCut;
+    if (cutText) output.cutText = cutText;
+    if (hiddenText) output.hiddenText = hiddenText;
+    if (postCut) output.postCut = postCut;
+  }
+  return { ...output };
 }

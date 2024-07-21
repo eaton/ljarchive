@@ -1,8 +1,9 @@
 /**
- * Replace `<lj user="username" />` tags with classed a tags.
+ * Given a markup string, returns a key/value collection of markup fragments
+ * and the associated usernames; these can be used for quick search and replace
+ * operations.
  */
-function replaceLjUserTags(html: string, replacement?: string) {
-  const pattern = /<lj user=['"]?(\w*)['"]?[^>]*>/gi;
-  const template = replacement ?? `<a class="lj-user" href="https://livejournal.com/users/$1">$1</a>`;
-  return html.replaceAll(pattern, template);
+export function parseUserTags(html: string) {
+  const matches = html.matchAll(/<lj user=['"]?(\w*)['"]?[^>]*>/gi) ?? [];
+  return Object.fromEntries([...matches].map(m => [m[0], m[1]]));
 }
