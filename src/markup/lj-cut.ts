@@ -44,7 +44,6 @@ export type CutResults = {
   postCut?: string;
 };
 
-
 /**
  * Given a markup string, searches for various permutations of the `<lj-cut>`
  * tag and returns an object with preCut, cutText, hiddenText, and postCut

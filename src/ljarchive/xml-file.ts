@@ -8,13 +8,6 @@ export function oneOrMany<T extends z.ZodTypeAny>(schema: T) {
     .transform(i => (i !== undefined && Array.isArray(i) ? i : [i]));
 }
 
-export function parseLJArchiveXml(input: string, options: X2jOptions = {}) {
-  const parser = new XMLParser(options);
-  const obj = parser.parse(input);
-  const parsed = xmlFile.parse(obj);
-  return parsed.livejournal.entry;
-}
-
 const pdate = z.string().transform(d => dayjs(d).toDate());
 
 const author = z.object({
@@ -27,9 +20,7 @@ const comment = z.object({
   eventtime: pdate,
   event: z.string(),
   author,
-}).transform(e => ({
-  
-}));
+})
 
 const entry = z.object({
   itemid: z.number(),
@@ -44,8 +35,15 @@ const entry = z.object({
 
 }));
 
-const xmlFile = z.object({
+const ljArchiveXml = z.object({
   livejournal: z.object({
     entry: oneOrMany(entry).optional(),
   }),
 });
+
+export function parse(input: string | Buffer, options: X2jOptions = {}) {
+  const parser = new XMLParser(options);
+  const obj = parser.parse(input.toString());
+  const parsed = ljArchiveXml.parse(obj);
+  return parsed.livejournal.entry;
+}
