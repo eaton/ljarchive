@@ -1,5 +1,5 @@
 import { Parser } from '../binary-parser.js';
-import { optStr, varStr, bool, timestamp, entityIdField, recordCount, recordHeader } from './field-types.js';
+import { optStr, varStr, bool, timestamp, entityIdField, recordCount, recordHeader } from './fields.js';
 
 /**
  * This header block is mostly chaff, but contains useful metadata about how many of each record type are contained in the file.
@@ -35,7 +35,6 @@ const fileFooter = Parser.start()
   .nest('unity', { type: varStr })
   .nest('assembly', { type: varStr })
   .seek(4) // 0x01000108 0A020000 0009922C 00000B
-
 
 /**
  * Account login and syncing information.
@@ -125,7 +124,7 @@ const comment = Parser.start().useContextVars().nest({
     .nest('date', { type: timestamp })
 });
 
-export const ljaFile = Parser.start()
+export const file = Parser.start()
   .endianess('little')
   .nest('header', { type: fileHeader })
   .nest('options', { type: options })

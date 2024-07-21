@@ -1,1 +1,10 @@
-export * from './slj-file.js';
+export * from './file.js';
+export * from './schema.js';
+
+import { file } from './file.js';
+import { schema } from './schema.js';
+
+export function parse(input: Buffer) {
+  const raw = file.parse(input);
+  return schema.parse(raw);
+}

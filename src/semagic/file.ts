@@ -32,7 +32,7 @@ export const timestamp = Parser.start().nest({
   formatter: v => v.data
 });
 
-export const sljFile = Parser.start()
+export const file = Parser.start()
   .endianess('little')
   .uint16le('check1', { assert: 65535 })
   .uint16le("check2", { assert: 8 })
@@ -53,4 +53,3 @@ export const sljFile = Parser.start()
   .nest("mood", { type: varString })
   .int32le("moodId")
   .nest("userPic", { type: varString })
-

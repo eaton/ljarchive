@@ -3,7 +3,7 @@
 # 2024-07-19 | eaton | Initial implementation
 # https://sourceforge.net/projects/ljarchive/
 
-# LJArchive is basically just the .Net 3.5 Binary serializer in action.
+# LJArchive format is basically just the .Net 3.5 Binary serializer.
 # Figuring that out simplified quite a bit of subsequent testing, but it
 # also means this is incredibly vulnerable to minor version updates that
 # change the internal storage format of any field. This was built against
