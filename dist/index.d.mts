@@ -144,6 +144,118 @@ declare class Parser {
 
 declare const file$2: Parser;
 
+declare const mood: z.ZodObject<{
+    id: z.ZodNumber;
+    name: z.ZodString;
+    parentId: z.ZodOptional<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    id: number;
+    name: string;
+    parentId?: number | undefined;
+}, {
+    id: number;
+    name: string;
+    parentId?: number | undefined;
+}>;
+declare const user: z.ZodObject<{
+    id: z.ZodDefault<z.ZodNumber>;
+    name: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    id: number;
+    name: string;
+}, {
+    name: string;
+    id?: number | undefined;
+}>;
+declare const event$1: z.ZodObject<{
+    id: z.ZodNumber;
+    date: z.ZodDate;
+    security: z.ZodOptional<z.ZodString>;
+    audience: z.ZodOptional<z.ZodNumber>;
+    subject: z.ZodOptional<z.ZodString>;
+    body: z.ZodOptional<z.ZodString>;
+    mood: z.ZodOptional<z.ZodString>;
+    moodId: z.ZodOptional<z.ZodNumber>;
+    music: z.ZodOptional<z.ZodString>;
+    isPreformatted: z.ZodOptional<z.ZodBoolean>;
+    noComments: z.ZodOptional<z.ZodBoolean>;
+    userPicKeyword: z.ZodOptional<z.ZodString>;
+    isBackdated: z.ZodOptional<z.ZodBoolean>;
+    noEmail: z.ZodOptional<z.ZodBoolean>;
+    revision: z.ZodOptional<z.ZodNumber>;
+    commentAlter: z.ZodOptional<z.ZodNumber>;
+    syndicationId: z.ZodOptional<z.ZodString>;
+    syndicationUrl: z.ZodOptional<z.ZodString>;
+    lastModified: z.ZodOptional<z.ZodDate>;
+}, "strip", z.ZodTypeAny, {
+    id: number;
+    date: Date;
+    security?: string | undefined;
+    audience?: number | undefined;
+    subject?: string | undefined;
+    body?: string | undefined;
+    mood?: string | undefined;
+    moodId?: number | undefined;
+    music?: string | undefined;
+    isPreformatted?: boolean | undefined;
+    noComments?: boolean | undefined;
+    userPicKeyword?: string | undefined;
+    isBackdated?: boolean | undefined;
+    noEmail?: boolean | undefined;
+    revision?: number | undefined;
+    commentAlter?: number | undefined;
+    syndicationId?: string | undefined;
+    syndicationUrl?: string | undefined;
+    lastModified?: Date | undefined;
+}, {
+    id: number;
+    date: Date;
+    security?: string | undefined;
+    audience?: number | undefined;
+    subject?: string | undefined;
+    body?: string | undefined;
+    mood?: string | undefined;
+    moodId?: number | undefined;
+    music?: string | undefined;
+    isPreformatted?: boolean | undefined;
+    noComments?: boolean | undefined;
+    userPicKeyword?: string | undefined;
+    isBackdated?: boolean | undefined;
+    noEmail?: boolean | undefined;
+    revision?: number | undefined;
+    commentAlter?: number | undefined;
+    syndicationId?: string | undefined;
+    syndicationUrl?: string | undefined;
+    lastModified?: Date | undefined;
+}>;
+declare const comment$1: z.ZodObject<{
+    id: z.ZodNumber;
+    userId: z.ZodDefault<z.ZodNumber>;
+    userName: z.ZodOptional<z.ZodString>;
+    eventId: z.ZodNumber;
+    parentId: z.ZodOptional<z.ZodNumber>;
+    body: z.ZodOptional<z.ZodString>;
+    subject: z.ZodOptional<z.ZodString>;
+    date: z.ZodDate;
+}, "strip", z.ZodTypeAny, {
+    id: number;
+    date: Date;
+    userId: number;
+    eventId: number;
+    userName?: string | undefined;
+    parentId?: number | undefined;
+    subject?: string | undefined;
+    body?: string | undefined;
+}, {
+    id: number;
+    date: Date;
+    eventId: number;
+    userName?: string | undefined;
+    parentId?: number | undefined;
+    subject?: string | undefined;
+    body?: string | undefined;
+    userId?: number | undefined;
+}>;
 declare const schema$2: z.ZodObject<{
     options: z.ZodObject<{
         defaultUserPic: z.ZodOptional<z.ZodString>;
@@ -363,64 +475,259 @@ declare const schema$2: z.ZodObject<{
     events: unknown[];
     comments: unknown[];
 }>;
-type LjArchive = z.infer<typeof schema$2>;
+type LjArchiveFile = z.infer<typeof schema$2>;
+type LjArchiveMood = z.infer<typeof mood>;
+type LjArchiveUser = z.infer<typeof user>;
+type LjArchiveEvent = z.infer<typeof event$1>;
+type LjArchiveComment = z.infer<typeof comment$1>;
 
-declare function parse$2(input: Buffer): {
-    options: {
-        fullName: string;
-        userName: string;
-        defaultUserPic?: string | undefined;
-    };
-    moods: {
-        id: number;
-        name: string;
-        parentId?: number | undefined;
-    }[];
-    users: {
-        id: number;
-        name: string;
-    }[];
-    events: {
-        id: number;
-        date: Date;
-        security?: string | undefined;
-        audience?: number | undefined;
-        subject?: string | undefined;
-        body?: string | undefined;
-        mood?: string | undefined;
-        moodId?: number | undefined;
-        music?: string | undefined;
-        isPreformatted?: boolean | undefined;
-        noComments?: boolean | undefined;
-        userPicKeyword?: string | undefined;
-        isBackdated?: boolean | undefined;
-        noEmail?: boolean | undefined;
-        revision?: number | undefined;
-        commentAlter?: number | undefined;
-        syndicationId?: string | undefined;
-        syndicationUrl?: string | undefined;
-        lastModified?: Date | undefined;
-    }[];
-    comments: {
-        id: number;
-        date: Date;
-        userId: number;
-        eventId: number;
-        userName?: string | undefined;
-        parentId?: number | undefined;
-        subject?: string | undefined;
-        body?: string | undefined;
-    }[];
-};
+declare function parse$2(input: Buffer): LjArchiveFile;
 
-type index$2_LjArchive = LjArchive;
+type index$2_LjArchiveComment = LjArchiveComment;
+type index$2_LjArchiveEvent = LjArchiveEvent;
+type index$2_LjArchiveFile = LjArchiveFile;
+type index$2_LjArchiveMood = LjArchiveMood;
+type index$2_LjArchiveUser = LjArchiveUser;
 declare namespace index$2 {
-  export { type index$2_LjArchive as LjArchive, file$2 as file, parse$2 as parse, schema$2 as schema };
+  export { type index$2_LjArchiveComment as LjArchiveComment, type index$2_LjArchiveEvent as LjArchiveEvent, type index$2_LjArchiveFile as LjArchiveFile, type index$2_LjArchiveMood as LjArchiveMood, type index$2_LjArchiveUser as LjArchiveUser, file$2 as file, parse$2 as parse, schema$2 as schema };
 }
 
 declare const file$1: {
-    parse: (input: string | Buffer, options?: X2jOptions) => any;
+    parse: (input: string | Buffer, options?: X2jOptions) => LjXmlFile;
 };
+declare const comment: z.ZodObject<{
+    itemid: z.ZodNumber;
+    parentId: z.ZodOptional<z.ZodNumber>;
+    event: z.ZodOptional<z.ZodString>;
+    eventtime: z.ZodEffects<z.ZodString, Date, string>;
+    author: z.ZodObject<{
+        name: z.ZodString;
+        email: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        name: string;
+        email?: string | undefined;
+    }, {
+        name: string;
+        email?: string | undefined;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    itemid: number;
+    eventtime: Date;
+    author: {
+        name: string;
+        email?: string | undefined;
+    };
+    parentId?: number | undefined;
+    event?: string | undefined;
+}, {
+    itemid: number;
+    eventtime: string;
+    author: {
+        name: string;
+        email?: string | undefined;
+    };
+    parentId?: number | undefined;
+    event?: string | undefined;
+}>;
+declare const event: z.ZodObject<{
+    itemid: z.ZodNumber;
+    eventtime: z.ZodEffects<z.ZodString, Date, string>;
+    subject: z.ZodOptional<z.ZodString>;
+    event: z.ZodOptional<z.ZodString>;
+    current_mood: z.ZodOptional<z.ZodString>;
+    current_music: z.ZodOptional<z.ZodString>;
+    comment: z.ZodOptional<z.ZodEffects<z.ZodUnion<[z.ZodObject<{
+        itemid: z.ZodNumber;
+        parentId: z.ZodOptional<z.ZodNumber>;
+        event: z.ZodOptional<z.ZodString>;
+        eventtime: z.ZodEffects<z.ZodString, Date, string>;
+        author: z.ZodObject<{
+            name: z.ZodString;
+            email: z.ZodOptional<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            email?: string | undefined;
+        }, {
+            name: string;
+            email?: string | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }, {
+        itemid: number;
+        eventtime: string;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }>, z.ZodArray<z.ZodObject<{
+        itemid: z.ZodNumber;
+        parentId: z.ZodOptional<z.ZodNumber>;
+        event: z.ZodOptional<z.ZodString>;
+        eventtime: z.ZodEffects<z.ZodString, Date, string>;
+        author: z.ZodObject<{
+            name: z.ZodString;
+            email: z.ZodOptional<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            name: string;
+            email?: string | undefined;
+        }, {
+            name: string;
+            email?: string | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }, {
+        itemid: number;
+        eventtime: string;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }>, "many">]>, (({
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    } | {
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }[]) & any[]) | ({
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    } | {
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }[])[], {
+        itemid: number;
+        eventtime: string;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    } | {
+        itemid: number;
+        eventtime: string;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }[]>>;
+}, "strip", z.ZodTypeAny, {
+    itemid: number;
+    eventtime: Date;
+    subject?: string | undefined;
+    event?: string | undefined;
+    current_mood?: string | undefined;
+    current_music?: string | undefined;
+    comment?: (({
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    } | {
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }[]) & any[]) | ({
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    } | {
+        itemid: number;
+        eventtime: Date;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }[])[] | undefined;
+}, {
+    itemid: number;
+    eventtime: string;
+    subject?: string | undefined;
+    event?: string | undefined;
+    current_mood?: string | undefined;
+    current_music?: string | undefined;
+    comment?: {
+        itemid: number;
+        eventtime: string;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    } | {
+        itemid: number;
+        eventtime: string;
+        author: {
+            name: string;
+            email?: string | undefined;
+        };
+        parentId?: number | undefined;
+        event?: string | undefined;
+    }[] | undefined;
+}>;
 declare const schema$1: z.ZodObject<{
     livejournal: z.ZodObject<{
         entry: z.ZodEffects<z.ZodUnion<[z.ZodObject<{
@@ -1518,191 +1825,17 @@ declare const schema$1: z.ZodObject<{
         }[];
     };
 }>;
+type LjXmlFile = z.infer<typeof schema$1>;
+type LjXmlEvent = z.infer<typeof event>;
+type LjXmlComment = z.infer<typeof comment>;
 
-declare function parse$1(input: Buffer): {
-    livejournal: {
-        entry: (({
-            itemid: number;
-            eventtime: Date;
-            subject?: string | undefined;
-            event?: string | undefined;
-            current_mood?: string | undefined;
-            current_music?: string | undefined;
-            comment?: (({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[]) & any[]) | ({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[])[] | undefined;
-        } | {
-            itemid: number;
-            eventtime: Date;
-            subject?: string | undefined;
-            event?: string | undefined;
-            current_mood?: string | undefined;
-            current_music?: string | undefined;
-            comment?: (({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[]) & any[]) | ({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[])[] | undefined;
-        }[]) & any[]) | ({
-            itemid: number;
-            eventtime: Date;
-            subject?: string | undefined;
-            event?: string | undefined;
-            current_mood?: string | undefined;
-            current_music?: string | undefined;
-            comment?: (({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[]) & any[]) | ({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[])[] | undefined;
-        } | {
-            itemid: number;
-            eventtime: Date;
-            subject?: string | undefined;
-            event?: string | undefined;
-            current_mood?: string | undefined;
-            current_music?: string | undefined;
-            comment?: (({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[]) & any[]) | ({
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            } | {
-                itemid: number;
-                eventtime: Date;
-                author: {
-                    name: string;
-                    email?: string | undefined;
-                };
-                parentId?: number | undefined;
-                event?: string | undefined;
-            }[])[] | undefined;
-        }[])[];
-    };
-};
+declare function parse$1(input: Buffer): LjXmlFile;
 
+type index$1_LjXmlComment = LjXmlComment;
+type index$1_LjXmlEvent = LjXmlEvent;
+type index$1_LjXmlFile = LjXmlFile;
 declare namespace index$1 {
-  export { file$1 as file, parse$1 as parse, schema$1 as schema };
+  export { type index$1_LjXmlComment as LjXmlComment, type index$1_LjXmlEvent as LjXmlEvent, type index$1_LjXmlFile as LjXmlFile, file$1 as file, parse$1 as parse, schema$1 as schema };
 }
 
 declare const timestamp: Parser;
@@ -1739,25 +1872,17 @@ declare const schema: z.ZodObject<{
     music?: string | undefined;
     userPic?: string | undefined;
 }>;
+type SemagicFile = z.infer<typeof schema>;
 
-declare function parse(input: Buffer): {
-    id: number;
-    date: Date;
-    fullName?: string | undefined;
-    userName?: string | undefined;
-    subject?: string | undefined;
-    body?: string | undefined;
-    mood?: string | undefined;
-    music?: string | undefined;
-    userPic?: string | undefined;
-};
+declare function parse(input: Buffer): SemagicFile;
 
+type index_SemagicFile = SemagicFile;
 declare const index_file: typeof file;
 declare const index_parse: typeof parse;
 declare const index_schema: typeof schema;
 declare const index_timestamp: typeof timestamp;
 declare namespace index {
-  export { index_file as file, index_parse as parse, index_schema as schema, index_timestamp as timestamp };
+  export { type index_SemagicFile as SemagicFile, index_file as file, index_parse as parse, index_schema as schema, index_timestamp as timestamp };
 }
 
 /**
