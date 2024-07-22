@@ -3,7 +3,7 @@ import { X2jOptions, XMLParser } from 'fast-xml-parser';
 import { z } from 'zod';
 
 export const file = {
-  parse: function (input: string | Buffer, options: X2jOptions = {}) {
+  parse: function (input: string | Buffer, options: X2jOptions = {}): LjXmlFile {
     const parser = new XMLParser(options);
     return parser.parse(input.toString());
   }
@@ -44,3 +44,6 @@ export const schema = z.object({
   })
 });
 
+export type LjXmlFile = z.infer<typeof schema>;
+export type LjXmlEvent = z.infer<typeof event>;
+export type LjXmlComment = z.infer<typeof comment>;

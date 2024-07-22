@@ -11,3 +11,5 @@ export const schema = z.object({
   music: z.string().optional(),
   userPic: z.string().optional(),
 });
+
+export type SemagicFile = z.infer<typeof schema>;

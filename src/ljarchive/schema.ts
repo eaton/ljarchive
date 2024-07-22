@@ -58,4 +58,8 @@ export const schema = z.object({
   comments: z.array(comment.optional().catch(() => undefined)).transform(m => m.filter(i => i !== undefined)),
 })
 
-export type LjArchive = z.infer<typeof schema>;
+export type LjArchiveFile = z.infer<typeof schema>;
+export type LjArchiveMood = z.infer<typeof mood>
+export type LjArchiveUser = z.infer<typeof user>
+export type LjArchiveEvent = z.infer<typeof event>
+export type LjArchiveComment = z.infer<typeof comment>
