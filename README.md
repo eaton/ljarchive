@@ -10,7 +10,7 @@ Supported file formats are [Semagic](https://semagic.sourceforge.net) single-pos
 Two other helper functions also assist in processing some of the tanglier LJ-specific markup. Information about the potential variations in the markup came from [LiveJournal's old source code](https://github.com/apparentlymart/livejournal).
 
 - `parseCutTag(input: string)` finds various permutations of `<lj-cut>` tags in entry bodies and returns an object with four separate keys: `preCut`, `postCut`, `cutText`, and `hiddenText`. The cutText and hiddenText, critically, are only populated if custom link text exists in the entry or a fully closed cut tag is used to wrap some text while leaving the remainder of the post visible. Knock yourselves out.
-- `parseUserTags(input: string)` Takes post bodies and returns a keyed dictionary of found-markup and corresponding LJ usernames. This can be used to quickly replace `<lj-user name="foo">` style tags with whatever else you'd like.
+- `parseUserTags(input: string)` Takes post bodies and returns a keyed dictionary of found-markup and corresponding LJ usernames. This can be used to quickly replace `<lj user="foo">` style tags with whatever else you'd like.
 
 If you're particularly weird and use the Mac hex editor HexFiend, TCL language templates for .lja and .slj files are also available in the `/hex/` directory. Do as you will.
 
