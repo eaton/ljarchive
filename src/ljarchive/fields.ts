@@ -13,7 +13,19 @@ export const bool = Parser.start().nest({
 export const bitmask = Parser.start().nest({
   type: Parser.start()
     .uint16le('type', { assert: 2056 })
-    .buffer('data', { length: 4, formatter: (b: Buffer) => b.toString('binary')})
+    .buffer('data', {
+      length: 4, formatter: (b: Buffer) => {
+        const hex = b.toString('hex');
+        return hex.length ? hex : undefined;
+      }
+    }),
+  formatter: i => {
+    if ((i.data === undefined) || (i.data === '00000000')) {
+      return undefined;
+    } else {
+      return i.data;
+    }
+  }
 })
 
 export const entityIdField = Parser.start().nest({
