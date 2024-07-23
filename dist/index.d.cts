@@ -171,7 +171,7 @@ declare const event$1: z.ZodObject<{
     id: z.ZodNumber;
     date: z.ZodDate;
     security: z.ZodOptional<z.ZodString>;
-    audience: z.ZodOptional<z.ZodNumber>;
+    audience: z.ZodOptional<z.ZodString>;
     subject: z.ZodOptional<z.ZodString>;
     body: z.ZodOptional<z.ZodString>;
     mood: z.ZodOptional<z.ZodString>;
@@ -191,7 +191,7 @@ declare const event$1: z.ZodObject<{
     id: number;
     date: Date;
     security?: string | undefined;
-    audience?: number | undefined;
+    audience?: string | undefined;
     subject?: string | undefined;
     body?: string | undefined;
     mood?: string | undefined;
@@ -211,7 +211,7 @@ declare const event$1: z.ZodObject<{
     id: number;
     date: Date;
     security?: string | undefined;
-    audience?: number | undefined;
+    audience?: string | undefined;
     subject?: string | undefined;
     body?: string | undefined;
     mood?: string | undefined;
@@ -304,7 +304,7 @@ declare const schema$2: z.ZodObject<{
         id: z.ZodNumber;
         date: z.ZodDate;
         security: z.ZodOptional<z.ZodString>;
-        audience: z.ZodOptional<z.ZodNumber>;
+        audience: z.ZodOptional<z.ZodString>;
         subject: z.ZodOptional<z.ZodString>;
         body: z.ZodOptional<z.ZodString>;
         mood: z.ZodOptional<z.ZodString>;
@@ -324,7 +324,7 @@ declare const schema$2: z.ZodObject<{
         id: number;
         date: Date;
         security?: string | undefined;
-        audience?: number | undefined;
+        audience?: string | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         mood?: string | undefined;
@@ -344,7 +344,7 @@ declare const schema$2: z.ZodObject<{
         id: number;
         date: Date;
         security?: string | undefined;
-        audience?: number | undefined;
+        audience?: string | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         mood?: string | undefined;
@@ -364,7 +364,7 @@ declare const schema$2: z.ZodObject<{
         id: number;
         date: Date;
         security?: string | undefined;
-        audience?: number | undefined;
+        audience?: string | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         mood?: string | undefined;
@@ -437,7 +437,7 @@ declare const schema$2: z.ZodObject<{
         id: number;
         date: Date;
         security?: string | undefined;
-        audience?: number | undefined;
+        audience?: string | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         mood?: string | undefined;

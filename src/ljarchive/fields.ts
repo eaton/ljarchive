@@ -9,7 +9,13 @@ export const bool = Parser.start().nest({
     .uint8('data', { formatter: (i) => !!i }),
   formatter: v => v.data
 });
-  
+
+export const bitmask = Parser.start().nest({
+  type: Parser.start()
+    .uint16le('type', { assert: 2056 })
+    .buffer('data', { length: 3, formatter: (b: Buffer) => b.toString('binary')})
+})
+
 export const entityIdField = Parser.start().nest({
   type: Parser.start()
     .uint16('Check', { assert: 2056 })

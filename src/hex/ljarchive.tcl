@@ -15,7 +15,7 @@
 # 0x06 - 4-byte Field ID, then a variable-length string
 # 0x07 - Internal record metadata (see recordCount)
 # 0x0801 - Boolean (single byte with 0 or 1)
-# 0x0808 - 4-byte EntityID
+# 0x0808 - 4-byte EntityID OR a bitmask, frustratingly
 # 0x080D - 8-byte timestamp in ticks
 # 0x09 - 4-byte FieldID for an empty variable-length string
 # 0x10 - Record header (see recordStart)
@@ -70,6 +70,12 @@ proc bool {label} {
   # Mark is "0801"
   move 2
   uint8_bits 0 $label
+}
+
+proc bitmask {label} {
+  # Mark is "0808"
+  move 2
+  hex 3 $label
 }
 
 proc entityID {label} {
@@ -190,7 +196,7 @@ section -collapsed "events" {
       entityID "id"
       timestamp "date"
       varStr "security"
-      entityID "audience"
+      bitmask "audience"
       varStr "subject"
       varStr "body"
       varStr "unknown1"

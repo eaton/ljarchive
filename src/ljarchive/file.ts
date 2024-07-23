@@ -1,5 +1,5 @@
 import { Parser } from '../binary-parser.js';
-import { optStr, varStr, bool, timestamp, entityIdField, recordCount, recordHeader } from './fields.js';
+import { optStr, varStr, bool, timestamp, entityIdField, recordCount, recordHeader, bitmask } from './fields.js';
 
 /**
  * This header block is mostly chaff, but contains useful metadata about how many of each record type are contained in the file.
@@ -87,7 +87,7 @@ const event = Parser.start().nest({
     .nest('id', { type: entityIdField })
     .nest('date', { type: timestamp })
     .nest('security', { type: optStr })
-    .nest('audience', { type: entityIdField })
+    .nest('audience', { type: bitmask })
     .nest('subject', { type: optStr })
     .nest('body', { type: optStr })
     .nest('unknown1', { type: optStr })
