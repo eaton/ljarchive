@@ -21,7 +21,7 @@ const event = z.object({
   id: z.number(),
   date: z.coerce.date(),
   security: z.string().optional(),
-  audience: z.number().optional(),
+  audience: z.string().optional(),
   subject: z.string().optional(),
   body: z.string().optional(),
   mood: z.string().optional(),
