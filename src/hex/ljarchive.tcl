@@ -75,7 +75,7 @@ proc bool {label} {
 proc bitmask {label} {
   # Mark is "0808"
   move 2
-  hex 3 $label
+  hex 4 $label
 }
 
 proc entityID {label} {
