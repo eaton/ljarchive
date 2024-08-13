@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "A JS parser for LJArchive files",
   "engines": {
-    "node": "^20.10.0"
+    "node": ">20.10.0"
   },
   "type": "module",
   "main": "./dist/index.cjs",
