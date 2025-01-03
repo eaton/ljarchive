@@ -24,10 +24,13 @@
   "scripts": {
     "run": "node --import=tsimp src/index.ts",
     "demo": "node --import=tsimp src/test.ts",
-    "build": "rm -rf dist; rm -rf .tsimp; pkgroll --minify",
+    "build": "pkgroll",
+    "package": "pkgroll --minify --clean-dist",
     "format": "prettier --config prettier.config.js 'src/**/*.ts' --write",
     "test": "ava"
   },
+  "author": "Jeff Eaton <jeff@eaton.fyi> (https://eaton.fyi)",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eaton/ljarchive"
@@ -35,6 +38,7 @@
   "devDependencies": {
     "@types/node": "^20.14.10",
     "ava": "^6.1.2",
+    "fs-jetpack": "^5.1.0",
     "pkgroll": "^2.0.2",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",
@@ -46,7 +50,6 @@
     "@thi.ng/leb128": "^3.1.6",
     "dayjs": "^1.11.11",
     "fast-xml-parser": "^4.4.0",
-    "fs-jetpack": "^5.1.0",
     "zod": "^3.23.8"
   }
 }
