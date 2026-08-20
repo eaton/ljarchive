@@ -17,6 +17,17 @@ const user = z.object({
   name: z.string(),
 });
 
+/**
+ * The account's own icons. Only the ones LJArchive happened to record — an
+ * archive typically references far more keywords from its entries than appear
+ * here, so treat this as a partial index rather than the full set. Both fields
+ * are optional so a row missing one is still reported rather than discarded.
+ */
+const userPic = z.object({
+  keyword: z.string().optional(),
+  url: z.string().optional(),
+});
+
 const event = z.object({
   id: z.number(),
   date: z.coerce.date(),
@@ -54,12 +65,20 @@ const comment = z.object({
   parentId: z.number().optional(),
   body: z.string().optional(),
   subject: z.string().optional(),
-  date: z.coerce.date(),
+  /**
+   * Optional because a deleted comment has none. LJArchive keeps those as
+   * tombstones — id, author, and a `D` status, with no date, body, or subject
+   * — and requiring a date drops every one of them, silently, via the
+   * array-level `.catch()`. The record that a comment existed and was removed
+   * is worth keeping.
+   */
+  date: z.coerce.date().optional(),
 });
 
 export const schema = z.object({
   options,
   moods: z.array(mood.optional().catch(() => undefined)).transform(i => i.filter(i => i !== undefined)),
+  userPics: z.array(userPic.optional().catch(() => undefined)).transform(m => m.filter(i => i !== undefined)),
   users: z.array(user.optional().catch(() => undefined)).transform(m => m.filter(i => i !== undefined)),
   events: z.array(event.optional().catch(() => undefined)).transform(m => m.filter(i => i !== undefined)),
   comments: z.array(comment.optional().catch(() => undefined)).transform(m => m.filter(i => i !== undefined)),
@@ -68,5 +87,6 @@ export const schema = z.object({
 export type LjArchiveFile = z.infer<typeof schema>;
 export type LjArchiveMood = z.infer<typeof mood>
 export type LjArchiveUser = z.infer<typeof user>
+export type LjArchiveUserPic = z.infer<typeof userPic>
 export type LjArchiveEvent = z.infer<typeof event>
 export type LjArchiveComment = z.infer<typeof comment>

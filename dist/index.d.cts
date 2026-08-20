@@ -167,6 +167,22 @@ declare const user: z.ZodObject<{
     name: string;
     id?: number | undefined;
 }>;
+/**
+ * The account's own icons. Only the ones LJArchive happened to record — an
+ * archive typically references far more keywords from its entries than appear
+ * here, so treat this as a partial index rather than the full set. Both fields
+ * are optional so a row missing one is still reported rather than discarded.
+ */
+declare const userPic: z.ZodObject<{
+    keyword: z.ZodOptional<z.ZodString>;
+    url: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    keyword?: string | undefined;
+    url?: string | undefined;
+}, {
+    keyword?: string | undefined;
+    url?: string | undefined;
+}>;
 declare const event$1: z.ZodObject<{
     id: z.ZodNumber;
     date: z.ZodDate;
@@ -243,21 +259,28 @@ declare const comment$1: z.ZodObject<{
     parentId: z.ZodOptional<z.ZodNumber>;
     body: z.ZodOptional<z.ZodString>;
     subject: z.ZodOptional<z.ZodString>;
-    date: z.ZodDate;
+    /**
+     * Optional because a deleted comment has none. LJArchive keeps those as
+     * tombstones — id, author, and a `D` status, with no date, body, or subject
+     * — and requiring a date drops every one of them, silently, via the
+     * array-level `.catch()`. The record that a comment existed and was removed
+     * is worth keeping.
+     */
+    date: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
     id: number;
-    date: Date;
     userId: number;
     eventId: number;
     parentId?: number | undefined;
+    date?: Date | undefined;
     subject?: string | undefined;
     body?: string | undefined;
     commentStatus?: string | undefined;
 }, {
     id: number;
-    date: Date;
     eventId: number;
     parentId?: number | undefined;
+    date?: Date | undefined;
     subject?: string | undefined;
     body?: string | undefined;
     userId?: number | undefined;
@@ -293,6 +316,19 @@ declare const schema$2: z.ZodObject<{
         id: number;
         name: string;
         parentId?: number | undefined;
+    }[], unknown[]>;
+    userPics: z.ZodEffects<z.ZodArray<z.ZodCatch<z.ZodOptional<z.ZodObject<{
+        keyword: z.ZodOptional<z.ZodString>;
+        url: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        keyword?: string | undefined;
+        url?: string | undefined;
+    }, {
+        keyword?: string | undefined;
+        url?: string | undefined;
+    }>>>, "many">, {
+        keyword?: string | undefined;
+        url?: string | undefined;
     }[], unknown[]>;
     users: z.ZodEffects<z.ZodArray<z.ZodCatch<z.ZodOptional<z.ZodObject<{
         id: z.ZodDefault<z.ZodNumber>;
@@ -403,31 +439,38 @@ declare const schema$2: z.ZodObject<{
         parentId: z.ZodOptional<z.ZodNumber>;
         body: z.ZodOptional<z.ZodString>;
         subject: z.ZodOptional<z.ZodString>;
-        date: z.ZodDate;
+        /**
+         * Optional because a deleted comment has none. LJArchive keeps those as
+         * tombstones — id, author, and a `D` status, with no date, body, or subject
+         * — and requiring a date drops every one of them, silently, via the
+         * array-level `.catch()`. The record that a comment existed and was removed
+         * is worth keeping.
+         */
+        date: z.ZodOptional<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
         id: number;
-        date: Date;
         userId: number;
         eventId: number;
         parentId?: number | undefined;
+        date?: Date | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         commentStatus?: string | undefined;
     }, {
         id: number;
-        date: Date;
         eventId: number;
         parentId?: number | undefined;
+        date?: Date | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         userId?: number | undefined;
         commentStatus?: string | undefined;
     }>>>, "many">, {
         id: number;
-        date: Date;
         userId: number;
         eventId: number;
         parentId?: number | undefined;
+        date?: Date | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         commentStatus?: string | undefined;
@@ -442,6 +485,10 @@ declare const schema$2: z.ZodObject<{
         id: number;
         name: string;
         parentId?: number | undefined;
+    }[];
+    userPics: {
+        keyword?: string | undefined;
+        url?: string | undefined;
     }[];
     users: {
         id: number;
@@ -470,10 +517,10 @@ declare const schema$2: z.ZodObject<{
     }[];
     comments: {
         id: number;
-        date: Date;
         userId: number;
         eventId: number;
         parentId?: number | undefined;
+        date?: Date | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         commentStatus?: string | undefined;
@@ -485,6 +532,7 @@ declare const schema$2: z.ZodObject<{
         defaultUserPic?: string | undefined;
     };
     moods: unknown[];
+    userPics: unknown[];
     users: unknown[];
     events: unknown[];
     comments: unknown[];
@@ -492,6 +540,7 @@ declare const schema$2: z.ZodObject<{
 type LjArchiveFile = z.infer<typeof schema$2>;
 type LjArchiveMood = z.infer<typeof mood>;
 type LjArchiveUser = z.infer<typeof user>;
+type LjArchiveUserPic = z.infer<typeof userPic>;
 type LjArchiveEvent = z.infer<typeof event$1>;
 type LjArchiveComment = z.infer<typeof comment$1>;
 
@@ -502,9 +551,10 @@ type index$2_LjArchiveEvent = LjArchiveEvent;
 type index$2_LjArchiveFile = LjArchiveFile;
 type index$2_LjArchiveMood = LjArchiveMood;
 type index$2_LjArchiveUser = LjArchiveUser;
+type index$2_LjArchiveUserPic = LjArchiveUserPic;
 declare namespace index$2 {
   export { file$2 as file, parse$2 as parse, schema$2 as schema };
-  export type { index$2_LjArchiveComment as LjArchiveComment, index$2_LjArchiveEvent as LjArchiveEvent, index$2_LjArchiveFile as LjArchiveFile, index$2_LjArchiveMood as LjArchiveMood, index$2_LjArchiveUser as LjArchiveUser };
+  export type { index$2_LjArchiveComment as LjArchiveComment, index$2_LjArchiveEvent as LjArchiveEvent, index$2_LjArchiveFile as LjArchiveFile, index$2_LjArchiveMood as LjArchiveMood, index$2_LjArchiveUser as LjArchiveUser, index$2_LjArchiveUserPic as LjArchiveUserPic };
 }
 
 declare const file$1: {

@@ -1334,7 +1334,7 @@ const fileHeader = Parser.start().seek(22).nest("assembly", { type: varStr }).se
 const fileFooter = Parser.start().seek(5).nest("serializer", { type: varStr }).seek(4).nest("data", { type: varStr }).nest("unity", { type: varStr }).nest("assembly", { type: varStr }).seek(4);
 const options$1 = Parser.start().nest({ type: recordHeader }).nest("server", { type: optStr }).nest("defaultUserPic", { type: optStr }).nest("fullName", { type: optStr }).nest("userName", { type: optStr }).nest("passwordHash", { type: optStr }).nest("lastSynced", { type: timestamp$1 }).nest("unknown", { type: bool });
 const mood$1 = Parser.start().nest({ type: recordHeader }).nest("id", { type: entityIdField }).nest("name", { type: optStr }).nest("parentId", { type: entityIdField });
-const userPic = Parser.start().nest({ type: recordHeader }).nest("keyword", { type: optStr }).nest("url", { type: optStr });
+const userPic$1 = Parser.start().nest({ type: recordHeader }).nest("keyword", { type: optStr }).nest("url", { type: optStr });
 const user$1 = Parser.start().nest({ type: recordHeader }).nest("id", { type: entityIdField }).nest("name", { type: optStr });
 const event$2 = Parser.start().nest({
   type: Parser.start().nest({ type: recordHeader }).nest("id", { type: entityIdField }).nest("date", { type: timestamp$1 }).nest("security", { type: optStr }).nest("audience", { type: bitmask }).nest("subject", { type: optStr }).nest("body", { type: optStr }).nest("unknown1", { type: optStr }).nest("mood", { type: optStr }).nest("moodId", { type: entityIdField }).nest("music", { type: optStr }).nest("isPreformatted", { type: bool }).nest("noComments", { type: bool }).nest("userPicKeyword", { type: optStr }).nest("unknown2", { type: bool }).nest("isBackdated", { type: bool }).nest("noEmail", { type: bool }).nest("unknown2", { type: bool }).nest("revision", { type: entityIdField }).nest("commentAlter", { type: entityIdField }).nest("syndicationId", { type: optStr }).nest("syndicationUrl", { type: optStr }).nest("lastModified", { type: timestamp$1 })
@@ -1348,7 +1348,7 @@ const file$2 = Parser.start().endianess("little").nest("header", { type: fileHea
     return this.header.moodsRows;
   }
 }).array("userPics", {
-  type: userPic,
+  type: userPic$1,
   length: function() {
     return this.header.userpicsRows;
   }
@@ -1382,6 +1382,10 @@ const mood = zod.z.object({
 const user = zod.z.object({
   id: zod.z.number().default(0),
   name: zod.z.string()
+});
+const userPic = zod.z.object({
+  keyword: zod.z.string().optional(),
+  url: zod.z.string().optional()
 });
 const event$1 = zod.z.object({
   id: zod.z.number(),
@@ -1419,11 +1423,19 @@ const comment$1 = zod.z.object({
   parentId: zod.z.number().optional(),
   body: zod.z.string().optional(),
   subject: zod.z.string().optional(),
-  date: zod.z.coerce.date()
+  /**
+   * Optional because a deleted comment has none. LJArchive keeps those as
+   * tombstones — id, author, and a `D` status, with no date, body, or subject
+   * — and requiring a date drops every one of them, silently, via the
+   * array-level `.catch()`. The record that a comment existed and was removed
+   * is worth keeping.
+   */
+  date: zod.z.coerce.date().optional()
 });
 const schema$2 = zod.z.object({
   options,
   moods: zod.z.array(mood.optional().catch(() => void 0)).transform((i) => i.filter((i2) => i2 !== void 0)),
+  userPics: zod.z.array(userPic.optional().catch(() => void 0)).transform((m) => m.filter((i) => i !== void 0)),
   users: zod.z.array(user.optional().catch(() => void 0)).transform((m) => m.filter((i) => i !== void 0)),
   events: zod.z.array(event$1.optional().catch(() => void 0)).transform((m) => m.filter((i) => i !== void 0)),
   comments: zod.z.array(comment$1.optional().catch(() => void 0)).transform((m) => m.filter((i) => i !== void 0))
