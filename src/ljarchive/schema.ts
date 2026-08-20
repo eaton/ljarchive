@@ -41,8 +41,15 @@ const event = z.object({
 
 const comment = z.object({
   id: z.number(),
+  /** Resolve the author's name through `users`, which is keyed by this id. */
   userId: z.number().default(0),
-  userName: z.string().optional(),
+  /**
+   * LiveJournal's comment state: `A`ctive, `D`eleted, `S`creened. Left as a
+   * plain string rather than an enum — an unrecognized value would fail
+   * validation, and the array-level `.catch()` would then drop the whole
+   * comment rather than the one field.
+   */
+  commentStatus: z.string().optional(),
   eventId: z.number(),
   parentId: z.number().optional(),
   body: z.string().optional(),

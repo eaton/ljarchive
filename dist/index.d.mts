@@ -230,8 +230,15 @@ declare const event$1: z.ZodObject<{
 }>;
 declare const comment$1: z.ZodObject<{
     id: z.ZodNumber;
+    /** Resolve the author's name through `users`, which is keyed by this id. */
     userId: z.ZodDefault<z.ZodNumber>;
-    userName: z.ZodOptional<z.ZodString>;
+    /**
+     * LiveJournal's comment state: `A`ctive, `D`eleted, `S`creened. Left as a
+     * plain string rather than an enum — an unrecognized value would fail
+     * validation, and the array-level `.catch()` would then drop the whole
+     * comment rather than the one field.
+     */
+    commentStatus: z.ZodOptional<z.ZodString>;
     eventId: z.ZodNumber;
     parentId: z.ZodOptional<z.ZodNumber>;
     body: z.ZodOptional<z.ZodString>;
@@ -242,19 +249,19 @@ declare const comment$1: z.ZodObject<{
     date: Date;
     userId: number;
     eventId: number;
-    userName?: string | undefined;
     parentId?: number | undefined;
     subject?: string | undefined;
     body?: string | undefined;
+    commentStatus?: string | undefined;
 }, {
     id: number;
     date: Date;
     eventId: number;
-    userName?: string | undefined;
     parentId?: number | undefined;
     subject?: string | undefined;
     body?: string | undefined;
     userId?: number | undefined;
+    commentStatus?: string | undefined;
 }>;
 declare const schema$2: z.ZodObject<{
     options: z.ZodObject<{
@@ -262,12 +269,12 @@ declare const schema$2: z.ZodObject<{
         userName: z.ZodString;
         fullName: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        fullName: string;
         userName: string;
+        fullName: string;
         defaultUserPic?: string | undefined;
     }, {
-        fullName: string;
         userName: string;
+        fullName: string;
         defaultUserPic?: string | undefined;
     }>;
     moods: z.ZodEffects<z.ZodArray<z.ZodCatch<z.ZodOptional<z.ZodObject<{
@@ -383,8 +390,15 @@ declare const schema$2: z.ZodObject<{
     }[], unknown[]>;
     comments: z.ZodEffects<z.ZodArray<z.ZodCatch<z.ZodOptional<z.ZodObject<{
         id: z.ZodNumber;
+        /** Resolve the author's name through `users`, which is keyed by this id. */
         userId: z.ZodDefault<z.ZodNumber>;
-        userName: z.ZodOptional<z.ZodString>;
+        /**
+         * LiveJournal's comment state: `A`ctive, `D`eleted, `S`creened. Left as a
+         * plain string rather than an enum — an unrecognized value would fail
+         * validation, and the array-level `.catch()` would then drop the whole
+         * comment rather than the one field.
+         */
+        commentStatus: z.ZodOptional<z.ZodString>;
         eventId: z.ZodNumber;
         parentId: z.ZodOptional<z.ZodNumber>;
         body: z.ZodOptional<z.ZodString>;
@@ -395,33 +409,33 @@ declare const schema$2: z.ZodObject<{
         date: Date;
         userId: number;
         eventId: number;
-        userName?: string | undefined;
         parentId?: number | undefined;
         subject?: string | undefined;
         body?: string | undefined;
+        commentStatus?: string | undefined;
     }, {
         id: number;
         date: Date;
         eventId: number;
-        userName?: string | undefined;
         parentId?: number | undefined;
         subject?: string | undefined;
         body?: string | undefined;
         userId?: number | undefined;
+        commentStatus?: string | undefined;
     }>>>, "many">, {
         id: number;
         date: Date;
         userId: number;
         eventId: number;
-        userName?: string | undefined;
         parentId?: number | undefined;
         subject?: string | undefined;
         body?: string | undefined;
+        commentStatus?: string | undefined;
     }[], unknown[]>;
 }, "strip", z.ZodTypeAny, {
     options: {
-        fullName: string;
         userName: string;
+        fullName: string;
         defaultUserPic?: string | undefined;
     };
     moods: {
@@ -459,15 +473,15 @@ declare const schema$2: z.ZodObject<{
         date: Date;
         userId: number;
         eventId: number;
-        userName?: string | undefined;
         parentId?: number | undefined;
         subject?: string | undefined;
         body?: string | undefined;
+        commentStatus?: string | undefined;
     }[];
 }, {
     options: {
-        fullName: string;
         userName: string;
+        fullName: string;
         defaultUserPic?: string | undefined;
     };
     moods: unknown[];
@@ -489,7 +503,8 @@ type index$2_LjArchiveFile = LjArchiveFile;
 type index$2_LjArchiveMood = LjArchiveMood;
 type index$2_LjArchiveUser = LjArchiveUser;
 declare namespace index$2 {
-  export { type index$2_LjArchiveComment as LjArchiveComment, type index$2_LjArchiveEvent as LjArchiveEvent, type index$2_LjArchiveFile as LjArchiveFile, type index$2_LjArchiveMood as LjArchiveMood, type index$2_LjArchiveUser as LjArchiveUser, file$2 as file, parse$2 as parse, schema$2 as schema };
+  export { file$2 as file, parse$2 as parse, schema$2 as schema };
+  export type { index$2_LjArchiveComment as LjArchiveComment, index$2_LjArchiveEvent as LjArchiveEvent, index$2_LjArchiveFile as LjArchiveFile, index$2_LjArchiveMood as LjArchiveMood, index$2_LjArchiveUser as LjArchiveUser };
 }
 
 declare const file$1: {
@@ -1835,7 +1850,8 @@ type index$1_LjXmlComment = LjXmlComment;
 type index$1_LjXmlEvent = LjXmlEvent;
 type index$1_LjXmlFile = LjXmlFile;
 declare namespace index$1 {
-  export { type index$1_LjXmlComment as LjXmlComment, type index$1_LjXmlEvent as LjXmlEvent, type index$1_LjXmlFile as LjXmlFile, file$1 as file, parse$1 as parse, schema$1 as schema };
+  export { file$1 as file, parse$1 as parse, schema$1 as schema };
+  export type { index$1_LjXmlComment as LjXmlComment, index$1_LjXmlEvent as LjXmlEvent, index$1_LjXmlFile as LjXmlFile };
 }
 
 declare const timestamp: Parser;
@@ -1854,8 +1870,8 @@ declare const schema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: number;
     date: Date;
-    fullName?: string | undefined;
     userName?: string | undefined;
+    fullName?: string | undefined;
     subject?: string | undefined;
     body?: string | undefined;
     mood?: string | undefined;
@@ -1864,8 +1880,8 @@ declare const schema: z.ZodObject<{
 }, {
     id: number;
     date: Date;
-    fullName?: string | undefined;
     userName?: string | undefined;
+    fullName?: string | undefined;
     subject?: string | undefined;
     body?: string | undefined;
     mood?: string | undefined;
@@ -1882,7 +1898,8 @@ declare const index_parse: typeof parse;
 declare const index_schema: typeof schema;
 declare const index_timestamp: typeof timestamp;
 declare namespace index {
-  export { type index_SemagicFile as SemagicFile, index_file as file, index_parse as parse, index_schema as schema, index_timestamp as timestamp };
+  export { index_file as file, index_parse as parse, index_schema as schema, index_timestamp as timestamp };
+  export type { index_SemagicFile as SemagicFile };
 }
 
 /**
@@ -1944,4 +1961,5 @@ declare function parseUserTags(html: string): {
     [k: string]: string;
 };
 
-export { type CutResults, index$2 as lja, parseCutTag, parseUserTags, index as slj, index$1 as xml };
+export { index$2 as lja, parseCutTag, parseUserTags, index as slj, index$1 as xml };
+export type { CutResults };

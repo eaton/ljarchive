@@ -70,6 +70,36 @@ export const varStr = Parser.start().useContextVars(true).nest({
   }
 });
 
+/**
+ * Every string written into the file carries an object id, and .NET's
+ * BinaryFormatter writes a repeated value only once: later fields holding the
+ * same string are a MemberReference pointing back at that id. Resolving those
+ * needs a table of what has been seen so far.
+ *
+ * Cleared at the start of each parse. It is module state, which is not lovely,
+ * but the generated parser has no way to thread a table through nested field
+ * definitions.
+ */
+const strings = new Map<number, string>();
+
+export function resetStringTable() {
+  strings.clear();
+}
+
+/**
+ * An optional string field, in one of the two forms BinaryFormatter uses:
+ *
+ *   6  BinaryObjectString  the string itself, with the id being defined
+ *   9  MemberReference     an id pointing at a string written earlier
+ *
+ * Treating a reference as absent silently drops real values. It is easy to
+ * miss because the fields people check first look fine: bodies and subjects
+ * are mostly written inline, and the references among them nearly all point at
+ * the interned empty string, so an absent value is the right answer by
+ * accident. Columns holding a short repeated value are where it shows — in one
+ * real archive the comment table's third column resolved for 3 of 4129 rows
+ * without this, and all 4129 with it.
+ */
 export const optStr = Parser.start().useContextVars().nest({
   type: Parser.start()
     .uint8('fieldType', { assert: t => t === 6 || t === 9})
@@ -82,11 +112,19 @@ export const optStr = Parser.start().useContextVars().nest({
       },
     }),
   formatter: v => {
+    // A reference: fieldID names the string, and the parsed data is empty.
+    if (v.fieldType === 9) {
+      return strings.get(v.fieldID);
+    }
     if (is.emptyObject(v.data)) {
       return undefined;
-    } else {
-      return v.data;
     }
+    // An inline string: fieldID is the id this value is being given, so
+    // remember it for the references that follow.
+    if (typeof v.data === 'string') {
+      strings.set(v.fieldID, v.data);
+    }
+    return v.data;
   }
 });
 

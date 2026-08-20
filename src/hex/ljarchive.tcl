@@ -225,7 +225,7 @@ section -collapsed "comments" {
       recordStart
       entityID "id"
       entityID "userID"
-      varStr "userName"
+      varStr "commentStatus"
       entityID "eventId"
       entityID "parentId"
       varStr "body"

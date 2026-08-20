@@ -1,2 +1,1551 @@
-var _=Object.defineProperty;var u=(r,e)=>_(r,"name",{value:e,configurable:!0});import q from"@sindresorhus/is";import*as L from"@thi.ng/leb128";import{z as n}from"zod";import H from"dayjs";import{XMLParser as J}from"fast-xml-parser";class G{static{u(this,"Context")}code="";scopes=[["vars"]];bitFields=[];tmpVariableCount=0;references=new Map;importPath;imports=[];reverseImports=new Map;useContextVariables=!1;constructor(e,t){this.importPath=e,this.useContextVariables=t}generateVariable(e){const t=[...this.scopes[this.scopes.length-1]];return e&&t.push(e),t.join(".")}generateOption(e){switch(typeof e){case"number":return e.toString();case"string":return this.generateVariable(e);case"function":return`${this.addImport(e)}.call(${this.generateVariable()}, vars)`}}generateError(e){this.pushCode(`throw new Error(${e});`)}generateTmpVariable(){return"$tmp"+this.tmpVariableCount++}pushCode(e){this.code+=e+`
-`}pushPath(e){e&&this.scopes[this.scopes.length-1].push(e)}popPath(e){e&&this.scopes[this.scopes.length-1].pop()}pushScope(e){this.scopes.push([e])}popScope(){this.scopes.pop()}addImport(e){if(!this.importPath)return`(${e})`;let t=this.reverseImports.get(e);return t||(t=this.imports.push(e)-1,this.reverseImports.set(e,t)),`${this.importPath}[${t}]`}addReference(e){this.references.has(e)||this.references.set(e,{resolved:!1,requested:!1})}markResolved(e){const t=this.references.get(e);t&&(t.resolved=!0)}markRequested(e){e.forEach(t=>{const s=this.references.get(t);s&&(s.requested=!0)})}getUnresolvedReferences(){return Array.from(this.references).filter(([e,t])=>!t.resolved&&!t.requested).map(([e,t])=>e)}}const y=new Map,w="___parser_",$={uint8:1,uint16le:2,uint16be:2,uint32le:4,uint32be:4,int8:1,int16le:2,int16be:2,int32le:4,int32be:4,int64be:8,int64le:8,uint64be:8,uint64le:8,floatle:4,floatbe:4,doublele:8,doublebe:8},E={uint8:"Uint8",uint16le:"Uint16",uint16be:"Uint16",uint32le:"Uint32",uint32be:"Uint32",int8:"Int8",int16le:"Int16",int16be:"Int16",int32le:"Int32",int32be:"Int32",int64be:"BigInt64",int64le:"BigInt64",uint64be:"BigUint64",uint64le:"BigUint64",floatle:"Float32",floatbe:"Float32",doublele:"Float64",doublebe:"Float64"},T={uint8:!1,uint16le:!0,uint16be:!1,uint32le:!0,uint32be:!1,int8:!1,int16le:!0,int16be:!1,int32le:!0,int32be:!1,int64be:!1,int64le:!0,uint64be:!1,uint64le:!0,floatle:!0,floatbe:!1,doublele:!0,doublebe:!1};class a{static{u(this,"Parser")}varName="";type="";options={};next;head;compiled;endian="be";constructorFn;alias;useContextVariables=!1;constructor(){}static start(){return new a}primitiveGenerateN(e,t){const s=E[e],i=T[e];t.pushCode(`${t.generateVariable(this.varName)} = dataView.get${s}(offset, ${i});`),t.pushCode(`offset += ${$[e]};`)}primitiveN(e,t,s){return this.setNextParser(e,t,s)}useThisEndian(e){return e+this.endian.toLowerCase()}uint8(e,t={}){return this.primitiveN("uint8",e,t)}uint16(e,t={}){return this.primitiveN(this.useThisEndian("uint16"),e,t)}uint16le(e,t={}){return this.primitiveN("uint16le",e,t)}uint16be(e,t={}){return this.primitiveN("uint16be",e,t)}uint32(e,t={}){return this.primitiveN(this.useThisEndian("uint32"),e,t)}uint32le(e,t={}){return this.primitiveN("uint32le",e,t)}uint32be(e,t={}){return this.primitiveN("uint32be",e,t)}int8(e,t={}){return this.primitiveN("int8",e,t)}int16(e,t={}){return this.primitiveN(this.useThisEndian("int16"),e,t)}int16le(e,t={}){return this.primitiveN("int16le",e,t)}int16be(e,t={}){return this.primitiveN("int16be",e,t)}int32(e,t={}){return this.primitiveN(this.useThisEndian("int32"),e,t)}int32le(e,t={}){return this.primitiveN("int32le",e,t)}int32be(e,t={}){return this.primitiveN("int32be",e,t)}bigIntVersionCheck(){if(!DataView.prototype.getBigInt64)throw new Error("BigInt64 is unsupported on this runtime")}int64(e,t={}){return this.bigIntVersionCheck(),this.primitiveN(this.useThisEndian("int64"),e,t)}int64be(e,t={}){return this.bigIntVersionCheck(),this.primitiveN("int64be",e,t)}int64le(e,t={}){return this.bigIntVersionCheck(),this.primitiveN("int64le",e,t)}uint64(e,t={}){return this.bigIntVersionCheck(),this.primitiveN(this.useThisEndian("uint64"),e,t)}uint64be(e,t={}){return this.bigIntVersionCheck(),this.primitiveN("uint64be",e,t)}uint64le(e,t={}){return this.bigIntVersionCheck(),this.primitiveN("uint64le",e,t)}floatle(e,t={}){return this.primitiveN("floatle",e,t)}floatbe(e,t={}){return this.primitiveN("floatbe",e,t)}doublele(e,t={}){return this.primitiveN("doublele",e,t)}doublebe(e,t={}){return this.primitiveN("doublebe",e,t)}bitN(e,t,s){return s.length=e,this.setNextParser("bit",t,s)}bit1(e,t={}){return this.bitN(1,e,t)}bit2(e,t={}){return this.bitN(2,e,t)}bit3(e,t={}){return this.bitN(3,e,t)}bit4(e,t={}){return this.bitN(4,e,t)}bit5(e,t={}){return this.bitN(5,e,t)}bit6(e,t={}){return this.bitN(6,e,t)}bit7(e,t={}){return this.bitN(7,e,t)}bit8(e,t={}){return this.bitN(8,e,t)}bit9(e,t={}){return this.bitN(9,e,t)}bit10(e,t={}){return this.bitN(10,e,t)}bit11(e,t={}){return this.bitN(11,e,t)}bit12(e,t={}){return this.bitN(12,e,t)}bit13(e,t={}){return this.bitN(13,e,t)}bit14(e,t={}){return this.bitN(14,e,t)}bit15(e,t={}){return this.bitN(15,e,t)}bit16(e,t={}){return this.bitN(16,e,t)}bit17(e,t={}){return this.bitN(17,e,t)}bit18(e,t={}){return this.bitN(18,e,t)}bit19(e,t={}){return this.bitN(19,e,t)}bit20(e,t={}){return this.bitN(20,e,t)}bit21(e,t={}){return this.bitN(21,e,t)}bit22(e,t={}){return this.bitN(22,e,t)}bit23(e,t={}){return this.bitN(23,e,t)}bit24(e,t={}){return this.bitN(24,e,t)}bit25(e,t={}){return this.bitN(25,e,t)}bit26(e,t={}){return this.bitN(26,e,t)}bit27(e,t={}){return this.bitN(27,e,t)}bit28(e,t={}){return this.bitN(28,e,t)}bit29(e,t={}){return this.bitN(29,e,t)}bit30(e,t={}){return this.bitN(30,e,t)}bit31(e,t={}){return this.bitN(31,e,t)}bit32(e,t={}){return this.bitN(32,e,t)}namely(e){return y.set(e,this),this.alias=e,this}skip(e,t={}){return this.seek(e,t)}seek(e,t={}){if(t.assert)throw new Error("assert option on seek is not allowed.");return this.setNextParser("seek","",{length:e})}string(e,t){if(!t.zeroTerminated&&!t.length&&!t.greedy)throw new Error("One of length, zeroTerminated, or greedy must be defined for string.");if((t.zeroTerminated||t.length)&&t.greedy)throw new Error("greedy is mutually exclusive with length and zeroTerminated for string.");if(t.stripNull&&!(t.length||t.greedy))throw new Error("length or greedy must be defined if stripNull is enabled.");return t.encoding=t.encoding||"utf8",this.setNextParser("string",e,t)}buffer(e,t){if(!t.length&&!t.readUntil)throw new Error("length or readUntil must be defined for buffer.");return this.setNextParser("buffer",e,t)}wrapped(e,t){if(typeof t!="object"&&typeof e=="object"&&(t=e,e=""),!t||!t.wrapper||!t.type)throw new Error("Both wrapper and type must be defined for wrapped.");if(!t.length&&!t.readUntil)throw new Error("length or readUntil must be defined for wrapped.");return this.setNextParser("wrapper",e,t)}array(e,t){if(!t.readUntil&&!t.length&&!t.lengthInBytes)throw new Error("One of readUntil, length and lengthInBytes must be defined for array.");if(!t.type)throw new Error("type is required for array.");if(typeof t.type=="string"&&!y.has(t.type)&&!(t.type in $))throw new Error(`Array element type "${t.type}" is unknown.`);return this.setNextParser("array",e,t)}choice(e,t){if(typeof t!="object"&&typeof e=="object"&&(t=e,e=""),!t)throw new Error("tag and choices are are required for choice.");if(!t.tag)throw new Error("tag is requird for choice.");if(!t.choices)throw new Error("choices is required for choice.");for(const s in t.choices){const i=parseInt(s,10),o=t.choices[i];if(isNaN(i))throw new Error(`Choice key "${s}" is not a number.`);if(typeof o=="string"&&!y.has(o)&&!(o in $))throw new Error(`Choice type "${o}" is unknown.`)}return this.setNextParser("choice",e,t)}nest(e,t){if(typeof t!="object"&&typeof e=="object"&&(t=e,e=""),!t||!t.type)throw new Error("type is required for nest.");if(!(t.type instanceof a)&&!y.has(t.type))throw new Error("type must be a known parser name or a Parser object.");if(!(t.type instanceof a)&&!e)throw new Error("type must be a Parser object if the variable name is omitted.");return this.setNextParser("nest",e,t)}pointer(e,t){if(t.offset==null)throw new Error("offset is required for pointer.");if(!t.type)throw new Error("type is required for pointer.");if(typeof t.type=="string"&&!(t.type in $)&&!y.has(t.type))throw new Error(`Pointer type "${t.type}" is unknown.`);return this.setNextParser("pointer",e,t)}saveOffset(e,t={}){return this.setNextParser("saveOffset",e,t)}endianness(e){switch(e.toLowerCase()){case"little":this.endian="le";break;case"big":this.endian="be";break;default:throw new Error('endianness must be one of "little" or "big"')}return this}endianess(e){return this.endianness(e)}useContextVars(e=!0){return this.useContextVariables=e,this}create(e){if(!(e instanceof Function))throw new Error("Constructor must be a Function object.");return this.constructorFn=e,this}getContext(e){const t=new G(e,this.useContextVariables);return t.pushCode("var dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.length);"),this.alias?(this.addAliasedCode(t),t.pushCode(`return ${w+this.alias}(0).result;`)):this.addRawCode(t),t}getCode(){return this.getContext("imports").code}addRawCode(e){e.pushCode("var offset = 0;"),e.pushCode(`var vars = ${this.constructorFn?"new constructorFn()":"{}"};`),e.pushCode("vars.$parent = null;"),e.pushCode("vars.$root = vars;"),this.generate(e),this.resolveReferences(e),e.pushCode("delete vars.$parent;"),e.pushCode("delete vars.$root;"),e.pushCode("return vars;")}addAliasedCode(e){return e.pushCode(`function ${w+this.alias}(offset, context) {`),e.pushCode(`var vars = ${this.constructorFn?"new constructorFn()":"{}"};`),e.pushCode("var ctx = Object.assign({$parent: null, $root: vars}, context || {});"),e.pushCode("vars = Object.assign(vars, ctx);"),this.generate(e),e.markResolved(this.alias),this.resolveReferences(e),e.pushCode("Object.keys(ctx).forEach(function (item) { delete vars[item]; });"),e.pushCode("return { offset: offset, result: vars };"),e.pushCode("}"),e}resolveReferences(e){const t=e.getUnresolvedReferences();e.markRequested(t),t.forEach(s=>{y.get(s)?.addAliasedCode(e)})}compile(){const e="imports",t=this.getContext(e);this.compiled=new Function(e,"TextDecoder",`return function (buffer, constructorFn) { ${t.code} };`)(t.imports,TextDecoder)}sizeOf(){let e=NaN;if(Object.keys($).indexOf(this.type)>=0)e=$[this.type];else if(this.type==="string"&&typeof this.options.length=="number")e=this.options.length;else if(this.type==="buffer"&&typeof this.options.length=="number")e=this.options.length;else if(this.type==="array"&&typeof this.options.length=="number"){let t=NaN;typeof this.options.type=="string"?t=$[this.options.type]:this.options.type instanceof a&&(t=this.options.type.sizeOf()),e=this.options.length*t}else this.type==="seek"?e=this.options.length:this.type==="nest"?e=this.options.type.sizeOf():this.type||(e=0);return this.next&&(e+=this.next.sizeOf()),e}parse(e){return this.compiled||this.compile(),this.compiled(e,this.constructorFn)}setNextParser(e,t,s){const i=new a;return i.type=e,i.varName=t,i.options=s,i.endian=this.endian,this.head?this.head.next=i:this.next=i,this.head=i,this}generate(e){if(this.type){switch(this.type){case"uint8":case"uint16le":case"uint16be":case"uint32le":case"uint32be":case"int8":case"int16le":case"int16be":case"int32le":case"int32be":case"int64be":case"int64le":case"uint64be":case"uint64le":case"floatle":case"floatbe":case"doublele":case"doublebe":this.primitiveGenerateN(this.type,e);break;case"bit":this.generateBit(e);break;case"string":this.generateString(e);break;case"buffer":this.generateBuffer(e);break;case"seek":this.generateSeek(e);break;case"nest":this.generateNest(e);break;case"array":this.generateArray(e);break;case"choice":this.generateChoice(e);break;case"pointer":this.generatePointer(e);break;case"saveOffset":this.generateSaveOffset(e);break;case"wrapper":this.generateWrapper(e);break}this.type!=="bit"&&this.generateAssert(e)}const t=e.generateVariable(this.varName);return this.options.formatter&&this.type!=="bit"&&this.generateFormatter(e,t,this.options.formatter),this.generateNext(e)}generateAssert(e){if(!this.options.assert)return;const t=e.generateVariable(this.varName);switch(typeof this.options.assert){case"function":{const s=e.addImport(this.options.assert);e.pushCode(`if (!${s}.call(vars, ${t})) {`)}break;case"number":e.pushCode(`if (${this.options.assert} !== ${t}) {`);break;case"string":e.pushCode(`if (${JSON.stringify(this.options.assert)} !== ${t}) {`);break;default:throw new Error("assert option must be a string, number or a function.")}e.generateError(`"Assertion error: ${t} is " + ${JSON.stringify(this.options.assert.toString())}`),e.pushCode("}")}generateNext(e){return this.next&&(e=this.next.generate(e)),e}nextNotBit(){return this.next?this.next.type==="nest"?this.next.options&&this.next.options.type instanceof a?this.next.options.type.next?this.next.options.type.next.type!=="bit":!1:!0:this.next.type!=="bit":!0}generateBit(e){const t=JSON.parse(JSON.stringify(this));if(t.options=this.options,t.generateAssert=this.generateAssert.bind(this),t.generateFormatter=this.generateFormatter.bind(this),t.varName=e.generateVariable(t.varName),e.bitFields.push(t),!this.next||this.nextNotBit()){const s=e.generateTmpVariable();e.pushCode(`var ${s} = 0;`);const i=u((h=0)=>{let g=0;for(let m=h;m<e.bitFields.length;m++){const I=e.bitFields[m].options.length;if(g+I>32)break;g+=I}return g},"getMaxBits"),o=u(h=>(h<=8?(e.pushCode(`${s} = dataView.getUint8(offset);`),h=8):h<=16?(e.pushCode(`${s} = dataView.getUint16(offset);`),h=16):h<=24?(e.pushCode(`${s} = (dataView.getUint16(offset) << 8) | dataView.getUint8(offset + 2);`),h=24):(e.pushCode(`${s} = dataView.getUint32(offset);`),h=32),e.pushCode(`offset += ${h/8};`),h),"getBytes");let p=0;const f=this.endian==="be";let b=0,d=0;e.bitFields.forEach((h,g)=>{let m=h.options.length;if(m>d){if(d){const M=-1>>>32-d;e.pushCode(`${h.varName} = (${s} & 0x${M.toString(16)}) << ${m-d};`),m-=d}p=0,d=b=o(i(g)-d)}const I=f?b-p-m:p,D=-1>>>32-m;e.pushCode(`${h.varName} ${m<h.options.length?"|=":"="} ${s} >> ${I} & 0x${D.toString(16)};`),h.options.length===32&&e.pushCode(`${h.varName} >>>= 0`),h.options.assert&&h.generateAssert(e),h.options.formatter&&h.generateFormatter(e,h.varName,h.options.formatter),p+=m,d-=m}),e.bitFields=[]}}generateSeek(e){const t=e.generateOption(this.options.length);e.pushCode(`offset += ${t};`)}generateString(e){const t=e.generateVariable(this.varName),s=e.generateTmpVariable(),i=this.options.encoding,o=i.toLowerCase()==="hex",p='b => b.toString(16).padStart(2, "0")';if(this.options.length&&this.options.zeroTerminated){const f=this.options.length;e.pushCode(`var ${s} = offset;`),e.pushCode(`while(dataView.getUint8(offset++) !== 0 && offset - ${s} < ${f});`);const b=`offset - ${s} < ${f} ? offset - 1 : offset`;e.pushCode(o?`${t} = Array.from(buffer.subarray(${s}, ${b}), ${p}).join('');`:`${t} = new TextDecoder('${i}').decode(buffer.subarray(${s}, ${b}));`)}else if(this.options.length){const f=e.generateOption(this.options.length);e.pushCode(o?`${t} = Array.from(buffer.subarray(offset, offset + ${f}), ${p}).join('');`:`${t} = new TextDecoder('${i}').decode(buffer.subarray(offset, offset + ${f}));`),e.pushCode(`offset += ${f};`)}else this.options.zeroTerminated?(e.pushCode(`var ${s} = offset;`),e.pushCode("while(dataView.getUint8(offset++) !== 0);"),e.pushCode(o?`${t} = Array.from(buffer.subarray(${s}, offset - 1), ${p}).join('');`:`${t} = new TextDecoder('${i}').decode(buffer.subarray(${s}, offset - 1));`)):this.options.greedy&&(e.pushCode(`var ${s} = offset;`),e.pushCode("while(buffer.length > offset++);"),e.pushCode(o?`${t} = Array.from(buffer.subarray(${s}, offset), ${p}).join('');`:`${t} = new TextDecoder('${i}').decode(buffer.subarray(${s}, offset));`));this.options.stripNull&&e.pushCode(`${t} = ${t}.replace(/\\x00+$/g, '')`)}generateBuffer(e){const t=e.generateVariable(this.varName);if(typeof this.options.readUntil=="function"){const s=this.options.readUntil,i=e.generateTmpVariable(),o=e.generateTmpVariable();e.pushCode(`var ${i} = offset;`),e.pushCode(`var ${o} = 0;`),e.pushCode("while (offset < buffer.length) {"),e.pushCode(`${o} = dataView.getUint8(offset);`);const p=e.addImport(s);e.pushCode(`if (${p}.call(${e.generateVariable()}, ${o}, buffer.subarray(offset))) break;`),e.pushCode("offset += 1;"),e.pushCode("}"),e.pushCode(`${t} = buffer.subarray(${i}, offset);`)}else if(this.options.readUntil==="eof")e.pushCode(`${t} = buffer.subarray(offset);`);else{const s=e.generateOption(this.options.length);e.pushCode(`${t} = buffer.subarray(offset, offset + ${s});`),e.pushCode(`offset += ${s};`)}this.options.clone&&e.pushCode(`${t} = buffer.constructor.from(${t});`)}generateArray(e){const t=e.generateOption(this.options.length),s=e.generateOption(this.options.lengthInBytes),i=this.options.type,o=e.generateTmpVariable(),p=e.generateVariable(this.varName),f=e.generateTmpVariable(),b=this.options.key,d=typeof b=="string";if(d?e.pushCode(`${p} = {};`):e.pushCode(`${p} = [];`),typeof this.options.readUntil=="function"?e.pushCode("do {"):this.options.readUntil==="eof"?e.pushCode(`for (var ${o} = 0; offset < buffer.length; ${o}++) {`):s!==void 0?e.pushCode(`for (var ${o} = offset + ${s}; offset < ${o}; ) {`):e.pushCode(`for (var ${o} = ${t}; ${o} > 0; ${o}--) {`),typeof i=="string")if(y.get(i)){const h=e.generateTmpVariable();if(e.pushCode(`var ${h} = ${w+i}(offset, {`),e.useContextVariables){const g=e.generateVariable();e.pushCode(`$parent: ${g},`),e.pushCode(`$root: ${g}.$root,`),!this.options.readUntil&&s===void 0&&e.pushCode(`$index: ${t} - ${o},`)}e.pushCode("});"),e.pushCode(`var ${f} = ${h}.result; offset = ${h}.offset;`),i!==this.alias&&e.addReference(i)}else{const h=E[i],g=T[i];e.pushCode(`var ${f} = dataView.get${h}(offset, ${g});`),e.pushCode(`offset += ${$[i]};`)}else if(i instanceof a){e.pushCode(`var ${f} = {};`);const h=e.generateVariable();e.pushScope(f),e.useContextVariables&&(e.pushCode(`${f}.$parent = ${h};`),e.pushCode(`${f}.$root = ${h}.$root;`),!this.options.readUntil&&s===void 0&&e.pushCode(`${f}.$index = ${t} - ${o};`)),i.generate(e),e.useContextVariables&&(e.pushCode(`delete ${f}.$parent;`),e.pushCode(`delete ${f}.$root;`),e.pushCode(`delete ${f}.$index;`)),e.popScope()}if(d?e.pushCode(`${p}[${f}.${b}] = ${f};`):e.pushCode(`${p}.push(${f});`),e.pushCode("}"),typeof this.options.readUntil=="function"){const h=this.options.readUntil,g=e.addImport(h);e.pushCode(`while (!${g}.call(${e.generateVariable()}, ${f}, buffer.subarray(offset)));`)}}generateChoiceCase(e,t,s){if(typeof s=="string"){const i=e.generateVariable(this.varName);if(y.has(s)){const o=e.generateTmpVariable();e.pushCode(`var ${o} = ${w+s}(offset, {`),e.useContextVariables&&(e.pushCode(`$parent: ${i}.$parent,`),e.pushCode(`$root: ${i}.$root,`)),e.pushCode("});"),e.pushCode(`${i} = ${o}.result; offset = ${o}.offset;`),s!==this.alias&&e.addReference(s)}else{const o=E[s],p=T[s];e.pushCode(`${i} = dataView.get${o}(offset, ${p});`),e.pushCode(`offset += ${$[s]}`)}}else s instanceof a&&(e.pushPath(t),s.generate(e),e.popPath(t))}generateChoice(e){const t=e.generateOption(this.options.tag),s=e.generateVariable(this.varName);if(this.varName&&(e.pushCode(`${s} = {};`),e.useContextVariables)){const i=e.generateVariable();e.pushCode(`${s}.$parent = ${i};`),e.pushCode(`${s}.$root = ${i}.$root;`)}e.pushCode(`switch(${t}) {`);for(const i in this.options.choices){const o=parseInt(i,10),p=this.options.choices[o];e.pushCode(`case ${o}:`),this.generateChoiceCase(e,this.varName,p),e.pushCode("break;")}e.pushCode("default:"),this.options.defaultChoice?this.generateChoiceCase(e,this.varName,this.options.defaultChoice):e.generateError(`"Met undefined tag value " + ${t} + " at choice"`),e.pushCode("}"),this.varName&&e.useContextVariables&&(e.pushCode(`delete ${s}.$parent;`),e.pushCode(`delete ${s}.$root;`))}generateNest(e){const t=e.generateVariable(this.varName);if(this.options.type instanceof a){if(this.varName&&(e.pushCode(`${t} = {};`),e.useContextVariables)){const s=e.generateVariable();e.pushCode(`${t}.$parent = ${s};`),e.pushCode(`${t}.$root = ${s}.$root;`)}e.pushPath(this.varName),this.options.type.generate(e),e.popPath(this.varName),this.varName&&e.useContextVariables&&e.useContextVariables&&(e.pushCode(`delete ${t}.$parent;`),e.pushCode(`delete ${t}.$root;`))}else if(y.has(this.options.type)){const s=e.generateTmpVariable();if(e.pushCode(`var ${s} = ${w+this.options.type}(offset, {`),e.useContextVariables){const i=e.generateVariable();e.pushCode(`$parent: ${i},`),e.pushCode(`$root: ${i}.$root,`)}e.pushCode("});"),e.pushCode(`${t} = ${s}.result; offset = ${s}.offset;`),this.options.type!==this.alias&&e.addReference(this.options.type)}}generateWrapper(e){const t=e.generateVariable(this.varName),s=e.generateTmpVariable();if(typeof this.options.readUntil=="function"){const b=this.options.readUntil,d=e.generateTmpVariable(),h=e.generateTmpVariable();e.pushCode(`var ${d} = offset;`),e.pushCode(`var ${h} = 0;`),e.pushCode("while (offset < buffer.length) {"),e.pushCode(`${h} = dataView.getUint8(offset);`);const g=e.addImport(b);e.pushCode(`if (${g}.call(${e.generateVariable()}, ${h}, buffer.subarray(offset))) break;`),e.pushCode("offset += 1;"),e.pushCode("}"),e.pushCode(`${s} = buffer.subarray(${d}, offset);`)}else if(this.options.readUntil==="eof")e.pushCode(`${s} = buffer.subarray(offset);`);else{const b=e.generateOption(this.options.length);e.pushCode(`${s} = buffer.subarray(offset, offset + ${b});`),e.pushCode(`offset += ${b};`)}this.options.clone&&e.pushCode(`${s} = buffer.constructor.from(${s});`);const i=e.generateTmpVariable(),o=e.generateTmpVariable(),p=e.generateTmpVariable(),f=e.addImport(this.options.wrapper);if(e.pushCode(`${s} = ${f}.call(this, ${s}).subarray(0);`),e.pushCode(`var ${i} = buffer;`),e.pushCode(`var ${o} = offset;`),e.pushCode(`var ${p} = dataView;`),e.pushCode(`buffer = ${s};`),e.pushCode("offset = 0;"),e.pushCode("dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.length);"),this.options.type instanceof a)this.varName&&e.pushCode(`${t} = {};`),e.pushPath(this.varName),this.options.type.generate(e),e.popPath(this.varName);else if(y.has(this.options.type)){const b=e.generateTmpVariable();e.pushCode(`var ${b} = ${w+this.options.type}(0);`),e.pushCode(`${t} = ${b}.result;`),this.options.type!==this.alias&&e.addReference(this.options.type)}e.pushCode(`buffer = ${i};`),e.pushCode(`dataView = ${p};`),e.pushCode(`offset = ${o};`)}generateFormatter(e,t,s){if(typeof s=="function"){const i=e.addImport(s);e.pushCode(`${t} = ${i}.call(${e.generateVariable()}, ${t});`)}}generatePointer(e){const t=this.options.type,s=e.generateOption(this.options.offset),i=e.generateTmpVariable(),o=e.generateVariable(this.varName);if(e.pushCode(`var ${i} = offset;`),e.pushCode(`offset = ${s};`),this.options.type instanceof a){if(e.pushCode(`${o} = {};`),e.useContextVariables){const p=e.generateVariable();e.pushCode(`${o}.$parent = ${p};`),e.pushCode(`${o}.$root = ${p}.$root;`)}e.pushPath(this.varName),this.options.type.generate(e),e.popPath(this.varName),e.useContextVariables&&(e.pushCode(`delete ${o}.$parent;`),e.pushCode(`delete ${o}.$root;`))}else if(y.has(this.options.type)){const p=e.generateTmpVariable();if(e.pushCode(`var ${p} = ${w+this.options.type}(offset, {`),e.useContextVariables){const f=e.generateVariable();e.pushCode(`$parent: ${f},`),e.pushCode(`$root: ${f}.$root,`)}e.pushCode("});"),e.pushCode(`${o} = ${p}.result; offset = ${p}.offset;`),this.options.type!==this.alias&&e.addReference(this.options.type)}else if(Object.keys($).indexOf(this.options.type)>=0){const p=E[t],f=T[t];e.pushCode(`${o} = dataView.get${p}(offset, ${f});`),e.pushCode(`offset += ${$[t]};`)}e.pushCode(`offset = ${i};`)}generateSaveOffset(e){const t=e.generateVariable(this.varName);e.pushCode(`${t} = offset`)}}function K(r){const e=621355968000000000n,t=10000n,s=8640000000000000n,p=(BigInt(r)-e)/t;if(p>s)throw new Error("Result exceeds max Date");if(p!==0n)return new Date(Number(p))}u(K,"ticksToDate");const N=a.start().nest({type:a.start().uint16le("type",{assert:264}).uint8("data",{formatter:u(r=>!!r,"formatter")}),formatter:u(r=>r.data,"formatter")}),W=a.start().nest({type:a.start().uint16le("type",{assert:2056}).buffer("data",{length:4,formatter:u(r=>{const e=r.toString("hex");return e.length?e:void 0},"formatter")}),formatter:u(r=>{if(!(r.data===void 0||r.data==="00000000"))return r.data},"formatter")}),c=a.start().nest({type:a.start().uint16("Check",{assert:2056}).uint32le("data"),formatter:u(r=>r.data||void 0,"formatter")}),j=a.start().nest({type:a.start().uint16le("type",{assert:3336}).uint64le("data",{formatter:u(r=>r===0n?void 0:K(r),"formatter")}),formatter:u(r=>r.data,"formatter")}),C=a.start().useContextVars(!0).nest({type:a.start().buffer("offset",{length:3,formatter:u(r=>L.decodeULEB128(new Uint8Array(r)),"formatter")}).seek(function(...r){return this.offset[1]-3}).string("string",{length:u(function(){return Number(this.offset[0])},"length")}),formatter:u(function(r){return r.string||void 0},"formatter")}),l=a.start().useContextVars().nest({type:a.start().uint8("fieldType",{assert:u(r=>r===6||r===9,"assert")}).uint32le("fieldID").choice("data",{tag:"fieldType",choices:{6:a.start().nest({type:C}),9:a.start()}}),formatter:u(r=>{if(!q.emptyObject(r.data))return r.data},"formatter")}),V=a.start().nest({type:a.start().int8("marker").int8("id").int32le("unknown1").int32le("unknown2").int32le("length").seek(1).array("spacers",{type:l,length:"length"}),formatter:u(r=>r.length,"formatter")}),k=a.start().nest({type:a.start().uint8("marker",{assert:16}).uint32le("recordId").uint32le("fieldCount"),formatter:u(()=>({}),"formatter")}),X=a.start().seek(22).nest("assembly",{type:C}).seek(5).nest("class",{type:C}).uint32le("tableCount").array("tableNames",{type:C,length:"tableCount"}).seek("tableCount").array("tableTypes",{type:C,length:"tableCount",formatter:u(()=>{},"formatter")}).seek(4).array("tableSpacer",{type:l,length:"tableCount",formatter:u(()=>{},"formatter")}).nest("optionsRows",{type:V}).nest("moodsRows",{type:V}).nest("userpicsRows",{type:V}).nest("usersRows",{type:V}).nest("eventsRows",{type:V}).nest("commentsRows",{type:V}),Z=a.start().seek(5).nest("serializer",{type:C}).seek(4).nest("data",{type:C}).nest("unity",{type:C}).nest("assembly",{type:C}).seek(4),Q=a.start().nest({type:k}).nest("server",{type:l}).nest("defaultUserPic",{type:l}).nest("fullName",{type:l}).nest("userName",{type:l}).nest("passwordHash",{type:l}).nest("lastSynced",{type:j}).nest("unknown",{type:N}),Y=a.start().nest({type:k}).nest("id",{type:c}).nest("name",{type:l}).nest("parentId",{type:c}),x=a.start().nest({type:k}).nest("keyword",{type:l}).nest("url",{type:l}),ee=a.start().nest({type:k}).nest("id",{type:c}).nest("name",{type:l}),te=a.start().nest({type:a.start().nest({type:k}).nest("id",{type:c}).nest("date",{type:j}).nest("security",{type:l}).nest("audience",{type:W}).nest("subject",{type:l}).nest("body",{type:l}).nest("unknown1",{type:l}).nest("mood",{type:l}).nest("moodId",{type:c}).nest("music",{type:l}).nest("isPreformatted",{type:N}).nest("noComments",{type:N}).nest("userPicKeyword",{type:l}).nest("unknown2",{type:N}).nest("isBackdated",{type:N}).nest("noEmail",{type:N}).nest("unknown2",{type:N}).nest("revision",{type:c}).nest("commentAlter",{type:c}).nest("syndicationId",{type:l}).nest("syndicationUrl",{type:l}).nest("lastModified",{type:j})}),se=a.start().useContextVars().nest({type:a.start().nest({type:k}).nest("id",{type:c}).nest("userId",{type:c}).nest("userName",{type:l}).nest("eventId",{type:c}).nest("parentId",{type:c}).nest("body",{type:l}).nest("subject",{type:l}).nest("date",{type:j})}),U=a.start().endianess("little").nest("header",{type:X}).nest("options",{type:Q}).array("moods",{type:Y,length:u(function(){return this.header.moodsRows},"length")}).array("userPics",{type:x,length:u(function(){return this.header.userpicsRows},"length")}).array("users",{type:ee,length:u(function(){return this.header.usersRows},"length")}).array("events",{type:te,length:u(function(){return this.header.eventsRows},"length")}).array("comments",{type:se,length:u(function(){return this.header.commentsRows},"length")}).nest("footer",{type:Z}),re=n.object({defaultUserPic:n.string().url().optional(),userName:n.string(),fullName:n.string()}),ne=n.object({id:n.number(),name:n.string(),parentId:n.number().optional()}),ie=n.object({id:n.number().default(0),name:n.string()}),oe=n.object({id:n.number(),date:n.coerce.date(),security:n.string().optional(),audience:n.string().optional(),subject:n.string().optional(),body:n.string().optional(),mood:n.string().optional(),moodId:n.number().optional(),music:n.string().optional(),isPreformatted:n.boolean().optional(),noComments:n.boolean().optional(),userPicKeyword:n.string().optional(),isBackdated:n.boolean().optional(),noEmail:n.boolean().optional(),revision:n.number().optional(),commentAlter:n.number().optional(),syndicationId:n.string().optional(),syndicationUrl:n.string().optional(),lastModified:n.coerce.date().optional()}),ae=n.object({id:n.number(),userId:n.number().default(0),userName:n.string().optional(),eventId:n.number(),parentId:n.number().optional(),body:n.string().optional(),subject:n.string().optional(),date:n.coerce.date()}),O=n.object({options:re,moods:n.array(ne.optional().catch(()=>{})).transform(r=>r.filter(e=>e!==void 0)),users:n.array(ie.optional().catch(()=>{})).transform(r=>r.filter(e=>e!==void 0)),events:n.array(oe.optional().catch(()=>{})).transform(r=>r.filter(e=>e!==void 0)),comments:n.array(ae.optional().catch(()=>{})).transform(r=>r.filter(e=>e!==void 0))});function he(r){const e=U.parse(r);return O.parse(e)}u(he,"parse$2");var pe=Object.freeze({__proto__:null,file:U,parse:he,schema:O});const P={parse:u(function(r,e={}){return new J(e).parse(r.toString())},"parse")};function S(r){return r.or(n.array(r)).transform(e=>e!==void 0&&Array.isArray(e)?e:[e])}u(S,"oneOrMany");const R=n.string().transform(r=>H(r).toDate()),ue=n.object({itemid:n.number(),parentId:n.number().optional(),event:n.string().optional(),eventtime:R,author:n.object({name:n.string(),email:n.string().optional()})}),fe=n.object({itemid:n.number(),eventtime:R,subject:n.string().optional(),event:n.string().optional(),current_mood:n.string().optional(),current_music:n.string().optional(),comment:S(ue).optional()}),F=n.object({livejournal:n.object({entry:S(fe)})});function le(r){const e=P.parse(r);return F.parse(e)}u(le,"parse$1");var de=Object.freeze({__proto__:null,file:P,parse:le,schema:F});const v=a.start().nest({type:a.start().uint16le("mark").seek(1).uint8("length",{formatter:u(r=>r*2,"formatter")}).choice("data",{tag:"length",choices:{510:a.start().nest({type:a.start().uint16le("length",{formatter:u(r=>r*2,"formatter")}).string("string",{length:"length",encoding:"utf-16le"})}),0:a.start()},defaultChoice:a.start().nest({type:a.start().seek(-1).uint8("length",{formatter:u(r=>r*2,"formatter")}).string("string",{length:"length",encoding:"utf-16le"})})}),formatter:u(r=>r.data?.string||void 0,"formatter")}),A=a.start().nest({type:a.start().uint32le("data",{formatter:u(r=>new Date(r*1e3),"formatter")}),formatter:u(r=>r.data,"formatter")}),B=a.start().endianess("little").uint16le("check1",{assert:65535}).uint16le("check2",{assert:8}).uint16le("check3",{assert:6}).string("typeCode",{length:10,stripNull:!0,assert:"CEntry"}).array("unknownStrings",{type:v,length:11}).int32le("id").int32le("unknown1").nest("userName",{type:v}).nest("fullName",{type:v}).nest("body",{type:v}).nest("subject",{type:v}).int32le("unknown2").int32le("unknown3").nest("date",{type:A}).int32le("unknown4").nest("music",{type:v}).nest("mood",{type:v}).int32le("moodId").nest("userPic",{type:v}),z=n.object({id:n.number(),date:n.date(),userName:n.string().optional(),fullName:n.string().optional(),subject:n.string().optional(),body:n.string().optional(),mood:n.string().optional(),music:n.string().optional(),userPic:n.string().optional()});function be(r){const e=B.parse(r);return z.parse(e)}u(be,"parse");var ge=Object.freeze({__proto__:null,file:B,parse:be,schema:z,timestamp:A});function me(r,e=!1){const t=/<lj-cut(?:\s+text=([^>]*))?>/is,s=/<\/lj-cut>/is;let i=t.exec(r)??void 0;const o={};if(!i)o.preCut=e?r.trim():r;else{let p=i[1]?.replaceAll(/(^['"]|['"]$)/g,""),[f,b]=r.split(i[0]),d,h;s.test(b)?[d,h]=b.split(s):h=b,f=e?f?.trim():f,p=e?p?.trim():p,d=e?d?.trim():d,h=e?h?.trim():h,f&&(o.preCut=f),p&&(o.cutText=p),d&&(o.hiddenText=d),h&&(o.postCut=h)}return{...o}}u(me,"parseCutTag");function ye(r){const e=r.matchAll(/<lj user=['"]?(\w*)['"]?[^>]*>/gi)??[];return Object.fromEntries([...e].map(t=>[t[0],t[1]]))}u(ye,"parseUserTags");export{pe as lja,me as parseCutTag,ye as parseUserTags,ge as slj,de as xml};
+import is from '@sindresorhus/is';
+import * as leb from '@thi.ng/leb128';
+import { z } from 'zod';
+import dayjs from 'dayjs';
+import { XMLParser } from 'fast-xml-parser';
+
+class Context {
+  code = "";
+  scopes = [["vars"]];
+  bitFields = [];
+  tmpVariableCount = 0;
+  references = /* @__PURE__ */ new Map();
+  importPath;
+  imports = [];
+  reverseImports = /* @__PURE__ */ new Map();
+  useContextVariables = false;
+  constructor(importPath, useContextVariables) {
+    this.importPath = importPath;
+    this.useContextVariables = useContextVariables;
+  }
+  generateVariable(name) {
+    const scopes = [...this.scopes[this.scopes.length - 1]];
+    if (name) {
+      scopes.push(name);
+    }
+    return scopes.join(".");
+  }
+  generateOption(val) {
+    switch (typeof val) {
+      case "number":
+        return val.toString();
+      case "string":
+        return this.generateVariable(val);
+      case "function":
+        return `${this.addImport(val)}.call(${this.generateVariable()}, vars)`;
+    }
+  }
+  generateError(err) {
+    this.pushCode(`throw new Error(${err});`);
+  }
+  generateTmpVariable() {
+    return "$tmp" + this.tmpVariableCount++;
+  }
+  pushCode(code) {
+    this.code += code + "\n";
+  }
+  pushPath(name) {
+    if (name) {
+      this.scopes[this.scopes.length - 1].push(name);
+    }
+  }
+  popPath(name) {
+    if (name) {
+      this.scopes[this.scopes.length - 1].pop();
+    }
+  }
+  pushScope(name) {
+    this.scopes.push([name]);
+  }
+  popScope() {
+    this.scopes.pop();
+  }
+  addImport(im) {
+    if (!this.importPath) return `(${im})`;
+    let id = this.reverseImports.get(im);
+    if (!id) {
+      id = this.imports.push(im) - 1;
+      this.reverseImports.set(im, id);
+    }
+    return `${this.importPath}[${id}]`;
+  }
+  addReference(alias) {
+    if (!this.references.has(alias)) {
+      this.references.set(alias, { resolved: false, requested: false });
+    }
+  }
+  markResolved(alias) {
+    const reference = this.references.get(alias);
+    if (reference) {
+      reference.resolved = true;
+    }
+  }
+  markRequested(aliasList) {
+    aliasList.forEach((alias) => {
+      const reference = this.references.get(alias);
+      if (reference) {
+        reference.requested = true;
+      }
+    });
+  }
+  getUnresolvedReferences() {
+    return Array.from(this.references).filter(([_, reference]) => !reference.resolved && !reference.requested).map(([alias, _]) => alias);
+  }
+}
+const aliasRegistry = /* @__PURE__ */ new Map();
+const FUNCTION_PREFIX = "___parser_";
+const PRIMITIVE_SIZES = {
+  uint8: 1,
+  uint16le: 2,
+  uint16be: 2,
+  uint32le: 4,
+  uint32be: 4,
+  int8: 1,
+  int16le: 2,
+  int16be: 2,
+  int32le: 4,
+  int32be: 4,
+  int64be: 8,
+  int64le: 8,
+  uint64be: 8,
+  uint64le: 8,
+  floatle: 4,
+  floatbe: 4,
+  doublele: 8,
+  doublebe: 8
+};
+const PRIMITIVE_NAMES = {
+  uint8: "Uint8",
+  uint16le: "Uint16",
+  uint16be: "Uint16",
+  uint32le: "Uint32",
+  uint32be: "Uint32",
+  int8: "Int8",
+  int16le: "Int16",
+  int16be: "Int16",
+  int32le: "Int32",
+  int32be: "Int32",
+  int64be: "BigInt64",
+  int64le: "BigInt64",
+  uint64be: "BigUint64",
+  uint64le: "BigUint64",
+  floatle: "Float32",
+  floatbe: "Float32",
+  doublele: "Float64",
+  doublebe: "Float64"
+};
+const PRIMITIVE_LITTLE_ENDIANS = {
+  uint8: false,
+  uint16le: true,
+  uint16be: false,
+  uint32le: true,
+  uint32be: false,
+  int8: false,
+  int16le: true,
+  int16be: false,
+  int32le: true,
+  int32be: false,
+  int64be: false,
+  int64le: true,
+  uint64be: false,
+  uint64le: true,
+  floatle: true,
+  floatbe: false,
+  doublele: true,
+  doublebe: false
+};
+class Parser {
+  varName = "";
+  type = "";
+  options = {};
+  next;
+  head;
+  compiled;
+  endian = "be";
+  constructorFn;
+  alias;
+  useContextVariables = false;
+  constructor() {
+  }
+  static start() {
+    return new Parser();
+  }
+  primitiveGenerateN(type, ctx) {
+    const typeName = PRIMITIVE_NAMES[type];
+    const littleEndian = PRIMITIVE_LITTLE_ENDIANS[type];
+    ctx.pushCode(
+      `${ctx.generateVariable(
+        this.varName
+      )} = dataView.get${typeName}(offset, ${littleEndian});`
+    );
+    ctx.pushCode(`offset += ${PRIMITIVE_SIZES[type]};`);
+  }
+  primitiveN(type, varName, options) {
+    return this.setNextParser(type, varName, options);
+  }
+  useThisEndian(type) {
+    return type + this.endian.toLowerCase();
+  }
+  uint8(varName, options = {}) {
+    return this.primitiveN("uint8", varName, options);
+  }
+  uint16(varName, options = {}) {
+    return this.primitiveN(this.useThisEndian("uint16"), varName, options);
+  }
+  uint16le(varName, options = {}) {
+    return this.primitiveN("uint16le", varName, options);
+  }
+  uint16be(varName, options = {}) {
+    return this.primitiveN("uint16be", varName, options);
+  }
+  uint32(varName, options = {}) {
+    return this.primitiveN(this.useThisEndian("uint32"), varName, options);
+  }
+  uint32le(varName, options = {}) {
+    return this.primitiveN("uint32le", varName, options);
+  }
+  uint32be(varName, options = {}) {
+    return this.primitiveN("uint32be", varName, options);
+  }
+  int8(varName, options = {}) {
+    return this.primitiveN("int8", varName, options);
+  }
+  int16(varName, options = {}) {
+    return this.primitiveN(this.useThisEndian("int16"), varName, options);
+  }
+  int16le(varName, options = {}) {
+    return this.primitiveN("int16le", varName, options);
+  }
+  int16be(varName, options = {}) {
+    return this.primitiveN("int16be", varName, options);
+  }
+  int32(varName, options = {}) {
+    return this.primitiveN(this.useThisEndian("int32"), varName, options);
+  }
+  int32le(varName, options = {}) {
+    return this.primitiveN("int32le", varName, options);
+  }
+  int32be(varName, options = {}) {
+    return this.primitiveN("int32be", varName, options);
+  }
+  bigIntVersionCheck() {
+    if (!DataView.prototype.getBigInt64)
+      throw new Error("BigInt64 is unsupported on this runtime");
+  }
+  int64(varName, options = {}) {
+    this.bigIntVersionCheck();
+    return this.primitiveN(this.useThisEndian("int64"), varName, options);
+  }
+  int64be(varName, options = {}) {
+    this.bigIntVersionCheck();
+    return this.primitiveN("int64be", varName, options);
+  }
+  int64le(varName, options = {}) {
+    this.bigIntVersionCheck();
+    return this.primitiveN("int64le", varName, options);
+  }
+  uint64(varName, options = {}) {
+    this.bigIntVersionCheck();
+    return this.primitiveN(this.useThisEndian("uint64"), varName, options);
+  }
+  uint64be(varName, options = {}) {
+    this.bigIntVersionCheck();
+    return this.primitiveN("uint64be", varName, options);
+  }
+  uint64le(varName, options = {}) {
+    this.bigIntVersionCheck();
+    return this.primitiveN("uint64le", varName, options);
+  }
+  floatle(varName, options = {}) {
+    return this.primitiveN("floatle", varName, options);
+  }
+  floatbe(varName, options = {}) {
+    return this.primitiveN("floatbe", varName, options);
+  }
+  doublele(varName, options = {}) {
+    return this.primitiveN("doublele", varName, options);
+  }
+  doublebe(varName, options = {}) {
+    return this.primitiveN("doublebe", varName, options);
+  }
+  bitN(size, varName, options) {
+    options.length = size;
+    return this.setNextParser("bit", varName, options);
+  }
+  bit1(varName, options = {}) {
+    return this.bitN(1, varName, options);
+  }
+  bit2(varName, options = {}) {
+    return this.bitN(2, varName, options);
+  }
+  bit3(varName, options = {}) {
+    return this.bitN(3, varName, options);
+  }
+  bit4(varName, options = {}) {
+    return this.bitN(4, varName, options);
+  }
+  bit5(varName, options = {}) {
+    return this.bitN(5, varName, options);
+  }
+  bit6(varName, options = {}) {
+    return this.bitN(6, varName, options);
+  }
+  bit7(varName, options = {}) {
+    return this.bitN(7, varName, options);
+  }
+  bit8(varName, options = {}) {
+    return this.bitN(8, varName, options);
+  }
+  bit9(varName, options = {}) {
+    return this.bitN(9, varName, options);
+  }
+  bit10(varName, options = {}) {
+    return this.bitN(10, varName, options);
+  }
+  bit11(varName, options = {}) {
+    return this.bitN(11, varName, options);
+  }
+  bit12(varName, options = {}) {
+    return this.bitN(12, varName, options);
+  }
+  bit13(varName, options = {}) {
+    return this.bitN(13, varName, options);
+  }
+  bit14(varName, options = {}) {
+    return this.bitN(14, varName, options);
+  }
+  bit15(varName, options = {}) {
+    return this.bitN(15, varName, options);
+  }
+  bit16(varName, options = {}) {
+    return this.bitN(16, varName, options);
+  }
+  bit17(varName, options = {}) {
+    return this.bitN(17, varName, options);
+  }
+  bit18(varName, options = {}) {
+    return this.bitN(18, varName, options);
+  }
+  bit19(varName, options = {}) {
+    return this.bitN(19, varName, options);
+  }
+  bit20(varName, options = {}) {
+    return this.bitN(20, varName, options);
+  }
+  bit21(varName, options = {}) {
+    return this.bitN(21, varName, options);
+  }
+  bit22(varName, options = {}) {
+    return this.bitN(22, varName, options);
+  }
+  bit23(varName, options = {}) {
+    return this.bitN(23, varName, options);
+  }
+  bit24(varName, options = {}) {
+    return this.bitN(24, varName, options);
+  }
+  bit25(varName, options = {}) {
+    return this.bitN(25, varName, options);
+  }
+  bit26(varName, options = {}) {
+    return this.bitN(26, varName, options);
+  }
+  bit27(varName, options = {}) {
+    return this.bitN(27, varName, options);
+  }
+  bit28(varName, options = {}) {
+    return this.bitN(28, varName, options);
+  }
+  bit29(varName, options = {}) {
+    return this.bitN(29, varName, options);
+  }
+  bit30(varName, options = {}) {
+    return this.bitN(30, varName, options);
+  }
+  bit31(varName, options = {}) {
+    return this.bitN(31, varName, options);
+  }
+  bit32(varName, options = {}) {
+    return this.bitN(32, varName, options);
+  }
+  namely(alias) {
+    aliasRegistry.set(alias, this);
+    this.alias = alias;
+    return this;
+  }
+  skip(length, options = {}) {
+    return this.seek(length, options);
+  }
+  seek(relOffset, options = {}) {
+    if (options.assert) {
+      throw new Error("assert option on seek is not allowed.");
+    }
+    return this.setNextParser("seek", "", { length: relOffset });
+  }
+  string(varName, options) {
+    if (!options.zeroTerminated && !options.length && !options.greedy) {
+      throw new Error(
+        "One of length, zeroTerminated, or greedy must be defined for string."
+      );
+    }
+    if ((options.zeroTerminated || options.length) && options.greedy) {
+      throw new Error(
+        "greedy is mutually exclusive with length and zeroTerminated for string."
+      );
+    }
+    if (options.stripNull && !(options.length || options.greedy)) {
+      throw new Error(
+        "length or greedy must be defined if stripNull is enabled."
+      );
+    }
+    options.encoding = options.encoding || "utf8";
+    return this.setNextParser("string", varName, options);
+  }
+  buffer(varName, options) {
+    if (!options.length && !options.readUntil) {
+      throw new Error("length or readUntil must be defined for buffer.");
+    }
+    return this.setNextParser("buffer", varName, options);
+  }
+  wrapped(varName, options) {
+    if (typeof options !== "object" && typeof varName === "object") {
+      options = varName;
+      varName = "";
+    }
+    if (!options || !options.wrapper || !options.type) {
+      throw new Error("Both wrapper and type must be defined for wrapped.");
+    }
+    if (!options.length && !options.readUntil) {
+      throw new Error("length or readUntil must be defined for wrapped.");
+    }
+    return this.setNextParser("wrapper", varName, options);
+  }
+  array(varName, options) {
+    if (!options.readUntil && !options.length && !options.lengthInBytes) {
+      throw new Error(
+        "One of readUntil, length and lengthInBytes must be defined for array."
+      );
+    }
+    if (!options.type) {
+      throw new Error("type is required for array.");
+    }
+    if (typeof options.type === "string" && !aliasRegistry.has(options.type) && !(options.type in PRIMITIVE_SIZES)) {
+      throw new Error(`Array element type "${options.type}" is unknown.`);
+    }
+    return this.setNextParser("array", varName, options);
+  }
+  choice(varName, options) {
+    if (typeof options !== "object" && typeof varName === "object") {
+      options = varName;
+      varName = "";
+    }
+    if (!options) {
+      throw new Error("tag and choices are are required for choice.");
+    }
+    if (!options.tag) {
+      throw new Error("tag is requird for choice.");
+    }
+    if (!options.choices) {
+      throw new Error("choices is required for choice.");
+    }
+    for (const keyString in options.choices) {
+      const key = parseInt(keyString, 10);
+      const value = options.choices[key];
+      if (isNaN(key)) {
+        throw new Error(`Choice key "${keyString}" is not a number.`);
+      }
+      if (typeof value === "string" && !aliasRegistry.has(value) && !(value in PRIMITIVE_SIZES)) {
+        throw new Error(`Choice type "${value}" is unknown.`);
+      }
+    }
+    return this.setNextParser("choice", varName, options);
+  }
+  nest(varName, options) {
+    if (typeof options !== "object" && typeof varName === "object") {
+      options = varName;
+      varName = "";
+    }
+    if (!options || !options.type) {
+      throw new Error("type is required for nest.");
+    }
+    if (!(options.type instanceof Parser) && !aliasRegistry.has(options.type)) {
+      throw new Error("type must be a known parser name or a Parser object.");
+    }
+    if (!(options.type instanceof Parser) && !varName) {
+      throw new Error(
+        "type must be a Parser object if the variable name is omitted."
+      );
+    }
+    return this.setNextParser("nest", varName, options);
+  }
+  pointer(varName, options) {
+    if (options.offset == null) {
+      throw new Error("offset is required for pointer.");
+    }
+    if (!options.type) {
+      throw new Error("type is required for pointer.");
+    }
+    if (typeof options.type === "string" && !(options.type in PRIMITIVE_SIZES) && !aliasRegistry.has(options.type)) {
+      throw new Error(`Pointer type "${options.type}" is unknown.`);
+    }
+    return this.setNextParser("pointer", varName, options);
+  }
+  saveOffset(varName, options = {}) {
+    return this.setNextParser("saveOffset", varName, options);
+  }
+  endianness(endianness) {
+    switch (endianness.toLowerCase()) {
+      case "little":
+        this.endian = "le";
+        break;
+      case "big":
+        this.endian = "be";
+        break;
+      default:
+        throw new Error('endianness must be one of "little" or "big"');
+    }
+    return this;
+  }
+  endianess(endianess) {
+    return this.endianness(endianess);
+  }
+  useContextVars(useContextVariables = true) {
+    this.useContextVariables = useContextVariables;
+    return this;
+  }
+  create(constructorFn) {
+    if (!(constructorFn instanceof Function)) {
+      throw new Error("Constructor must be a Function object.");
+    }
+    this.constructorFn = constructorFn;
+    return this;
+  }
+  getContext(importPath) {
+    const ctx = new Context(importPath, this.useContextVariables);
+    ctx.pushCode(
+      "var dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.length);"
+    );
+    if (!this.alias) {
+      this.addRawCode(ctx);
+    } else {
+      this.addAliasedCode(ctx);
+      ctx.pushCode(`return ${FUNCTION_PREFIX + this.alias}(0).result;`);
+    }
+    return ctx;
+  }
+  getCode() {
+    const importPath = "imports";
+    return this.getContext(importPath).code;
+  }
+  addRawCode(ctx) {
+    ctx.pushCode("var offset = 0;");
+    ctx.pushCode(
+      `var vars = ${this.constructorFn ? "new constructorFn()" : "{}"};`
+    );
+    ctx.pushCode("vars.$parent = null;");
+    ctx.pushCode("vars.$root = vars;");
+    this.generate(ctx);
+    this.resolveReferences(ctx);
+    ctx.pushCode("delete vars.$parent;");
+    ctx.pushCode("delete vars.$root;");
+    ctx.pushCode("return vars;");
+  }
+  addAliasedCode(ctx) {
+    ctx.pushCode(`function ${FUNCTION_PREFIX + this.alias}(offset, context) {`);
+    ctx.pushCode(
+      `var vars = ${this.constructorFn ? "new constructorFn()" : "{}"};`
+    );
+    ctx.pushCode(
+      "var ctx = Object.assign({$parent: null, $root: vars}, context || {});"
+    );
+    ctx.pushCode(`vars = Object.assign(vars, ctx);`);
+    this.generate(ctx);
+    ctx.markResolved(this.alias);
+    this.resolveReferences(ctx);
+    ctx.pushCode(
+      "Object.keys(ctx).forEach(function (item) { delete vars[item]; });"
+    );
+    ctx.pushCode("return { offset: offset, result: vars };");
+    ctx.pushCode("}");
+    return ctx;
+  }
+  resolveReferences(ctx) {
+    const references = ctx.getUnresolvedReferences();
+    ctx.markRequested(references);
+    references.forEach((alias) => {
+      aliasRegistry.get(alias)?.addAliasedCode(ctx);
+    });
+  }
+  compile() {
+    const importPath = "imports";
+    const ctx = this.getContext(importPath);
+    this.compiled = new Function(
+      importPath,
+      "TextDecoder",
+      `return function (buffer, constructorFn) { ${ctx.code} };`
+    )(ctx.imports, TextDecoder);
+  }
+  sizeOf() {
+    let size = NaN;
+    if (Object.keys(PRIMITIVE_SIZES).indexOf(this.type) >= 0) {
+      size = PRIMITIVE_SIZES[this.type];
+    } else if (this.type === "string" && typeof this.options.length === "number") {
+      size = this.options.length;
+    } else if (this.type === "buffer" && typeof this.options.length === "number") {
+      size = this.options.length;
+    } else if (this.type === "array" && typeof this.options.length === "number") {
+      let elementSize = NaN;
+      if (typeof this.options.type === "string") {
+        elementSize = PRIMITIVE_SIZES[this.options.type];
+      } else if (this.options.type instanceof Parser) {
+        elementSize = this.options.type.sizeOf();
+      }
+      size = this.options.length * elementSize;
+    } else if (this.type === "seek") {
+      size = this.options.length;
+    } else if (this.type === "nest") {
+      size = this.options.type.sizeOf();
+    } else if (!this.type) {
+      size = 0;
+    }
+    if (this.next) {
+      size += this.next.sizeOf();
+    }
+    return size;
+  }
+  // Follow the parser chain till the root and start parsing from there
+  parse(buffer) {
+    if (!this.compiled) {
+      this.compile();
+    }
+    return this.compiled(buffer, this.constructorFn);
+  }
+  setNextParser(type, varName, options) {
+    const parser = new Parser();
+    parser.type = type;
+    parser.varName = varName;
+    parser.options = options;
+    parser.endian = this.endian;
+    if (this.head) {
+      this.head.next = parser;
+    } else {
+      this.next = parser;
+    }
+    this.head = parser;
+    return this;
+  }
+  // Call code generator for this parser
+  generate(ctx) {
+    if (this.type) {
+      switch (this.type) {
+        case "uint8":
+        case "uint16le":
+        case "uint16be":
+        case "uint32le":
+        case "uint32be":
+        case "int8":
+        case "int16le":
+        case "int16be":
+        case "int32le":
+        case "int32be":
+        case "int64be":
+        case "int64le":
+        case "uint64be":
+        case "uint64le":
+        case "floatle":
+        case "floatbe":
+        case "doublele":
+        case "doublebe":
+          this.primitiveGenerateN(this.type, ctx);
+          break;
+        case "bit":
+          this.generateBit(ctx);
+          break;
+        case "string":
+          this.generateString(ctx);
+          break;
+        case "buffer":
+          this.generateBuffer(ctx);
+          break;
+        case "seek":
+          this.generateSeek(ctx);
+          break;
+        case "nest":
+          this.generateNest(ctx);
+          break;
+        case "array":
+          this.generateArray(ctx);
+          break;
+        case "choice":
+          this.generateChoice(ctx);
+          break;
+        case "pointer":
+          this.generatePointer(ctx);
+          break;
+        case "saveOffset":
+          this.generateSaveOffset(ctx);
+          break;
+        case "wrapper":
+          this.generateWrapper(ctx);
+          break;
+      }
+      if (this.type !== "bit") this.generateAssert(ctx);
+    }
+    const varName = ctx.generateVariable(this.varName);
+    if (this.options.formatter && this.type !== "bit") {
+      this.generateFormatter(ctx, varName, this.options.formatter);
+    }
+    return this.generateNext(ctx);
+  }
+  generateAssert(ctx) {
+    if (!this.options.assert) {
+      return;
+    }
+    const varName = ctx.generateVariable(this.varName);
+    switch (typeof this.options.assert) {
+      case "function":
+        {
+          const func = ctx.addImport(this.options.assert);
+          ctx.pushCode(`if (!${func}.call(vars, ${varName})) {`);
+        }
+        break;
+      case "number":
+        ctx.pushCode(`if (${this.options.assert} !== ${varName}) {`);
+        break;
+      case "string":
+        ctx.pushCode(
+          `if (${JSON.stringify(this.options.assert)} !== ${varName}) {`
+        );
+        break;
+      default:
+        throw new Error(
+          "assert option must be a string, number or a function."
+        );
+    }
+    ctx.generateError(
+      `"Assertion error: ${varName} is " + ${JSON.stringify(
+        this.options.assert.toString()
+      )}`
+    );
+    ctx.pushCode("}");
+  }
+  // Recursively call code generators and append results
+  generateNext(ctx) {
+    if (this.next) {
+      ctx = this.next.generate(ctx);
+    }
+    return ctx;
+  }
+  nextNotBit() {
+    if (this.next) {
+      if (this.next.type === "nest") {
+        if (this.next.options && this.next.options.type instanceof Parser) {
+          if (this.next.options.type.next) {
+            return this.next.options.type.next.type !== "bit";
+          }
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        return this.next.type !== "bit";
+      }
+    } else {
+      return true;
+    }
+  }
+  generateBit(ctx) {
+    const parser = JSON.parse(JSON.stringify(this));
+    parser.options = this.options;
+    parser.generateAssert = this.generateAssert.bind(this);
+    parser.generateFormatter = this.generateFormatter.bind(this);
+    parser.varName = ctx.generateVariable(parser.varName);
+    ctx.bitFields.push(parser);
+    if (!this.next || this.nextNotBit()) {
+      const val = ctx.generateTmpVariable();
+      ctx.pushCode(`var ${val} = 0;`);
+      const getMaxBits = (from = 0) => {
+        let sum2 = 0;
+        for (let i = from; i < ctx.bitFields.length; i++) {
+          const length = ctx.bitFields[i].options.length;
+          if (sum2 + length > 32) break;
+          sum2 += length;
+        }
+        return sum2;
+      };
+      const getBytes = (sum2) => {
+        if (sum2 <= 8) {
+          ctx.pushCode(`${val} = dataView.getUint8(offset);`);
+          sum2 = 8;
+        } else if (sum2 <= 16) {
+          ctx.pushCode(`${val} = dataView.getUint16(offset);`);
+          sum2 = 16;
+        } else if (sum2 <= 24) {
+          ctx.pushCode(
+            `${val} = (dataView.getUint16(offset) << 8) | dataView.getUint8(offset + 2);`
+          );
+          sum2 = 24;
+        } else {
+          ctx.pushCode(`${val} = dataView.getUint32(offset);`);
+          sum2 = 32;
+        }
+        ctx.pushCode(`offset += ${sum2 / 8};`);
+        return sum2;
+      };
+      let bitOffset = 0;
+      const isBigEndian = this.endian === "be";
+      let sum = 0;
+      let rem = 0;
+      ctx.bitFields.forEach((parser2, i) => {
+        let length = parser2.options.length;
+        if (length > rem) {
+          if (rem) {
+            const mask2 = -1 >>> 32 - rem;
+            ctx.pushCode(
+              `${parser2.varName} = (${val} & 0x${mask2.toString(16)}) << ${length - rem};`
+            );
+            length -= rem;
+          }
+          bitOffset = 0;
+          rem = sum = getBytes(getMaxBits(i) - rem);
+        }
+        const offset = isBigEndian ? sum - bitOffset - length : bitOffset;
+        const mask = -1 >>> 32 - length;
+        ctx.pushCode(
+          `${parser2.varName} ${length < parser2.options.length ? "|=" : "="} ${val} >> ${offset} & 0x${mask.toString(16)};`
+        );
+        if (parser2.options.length === 32) {
+          ctx.pushCode(`${parser2.varName} >>>= 0`);
+        }
+        if (parser2.options.assert) {
+          parser2.generateAssert(ctx);
+        }
+        if (parser2.options.formatter) {
+          parser2.generateFormatter(
+            ctx,
+            parser2.varName,
+            parser2.options.formatter
+          );
+        }
+        bitOffset += length;
+        rem -= length;
+      });
+      ctx.bitFields = [];
+    }
+  }
+  generateSeek(ctx) {
+    const length = ctx.generateOption(this.options.length);
+    ctx.pushCode(`offset += ${length};`);
+  }
+  generateString(ctx) {
+    const name = ctx.generateVariable(this.varName);
+    const start = ctx.generateTmpVariable();
+    const encoding = this.options.encoding;
+    const isHex = encoding.toLowerCase() === "hex";
+    const toHex = 'b => b.toString(16).padStart(2, "0")';
+    if (this.options.length && this.options.zeroTerminated) {
+      const len = this.options.length;
+      ctx.pushCode(`var ${start} = offset;`);
+      ctx.pushCode(
+        `while(dataView.getUint8(offset++) !== 0 && offset - ${start} < ${len});`
+      );
+      const end = `offset - ${start} < ${len} ? offset - 1 : offset`;
+      ctx.pushCode(
+        isHex ? `${name} = Array.from(buffer.subarray(${start}, ${end}), ${toHex}).join('');` : `${name} = new TextDecoder('${encoding}').decode(buffer.subarray(${start}, ${end}));`
+      );
+    } else if (this.options.length) {
+      const len = ctx.generateOption(this.options.length);
+      ctx.pushCode(
+        isHex ? `${name} = Array.from(buffer.subarray(offset, offset + ${len}), ${toHex}).join('');` : `${name} = new TextDecoder('${encoding}').decode(buffer.subarray(offset, offset + ${len}));`
+      );
+      ctx.pushCode(`offset += ${len};`);
+    } else if (this.options.zeroTerminated) {
+      ctx.pushCode(`var ${start} = offset;`);
+      ctx.pushCode("while(dataView.getUint8(offset++) !== 0);");
+      ctx.pushCode(
+        isHex ? `${name} = Array.from(buffer.subarray(${start}, offset - 1), ${toHex}).join('');` : `${name} = new TextDecoder('${encoding}').decode(buffer.subarray(${start}, offset - 1));`
+      );
+    } else if (this.options.greedy) {
+      ctx.pushCode(`var ${start} = offset;`);
+      ctx.pushCode("while(buffer.length > offset++);");
+      ctx.pushCode(
+        isHex ? `${name} = Array.from(buffer.subarray(${start}, offset), ${toHex}).join('');` : `${name} = new TextDecoder('${encoding}').decode(buffer.subarray(${start}, offset));`
+      );
+    }
+    if (this.options.stripNull) {
+      ctx.pushCode(`${name} = ${name}.replace(/\\x00+$/g, '')`);
+    }
+  }
+  generateBuffer(ctx) {
+    const varName = ctx.generateVariable(this.varName);
+    if (typeof this.options.readUntil === "function") {
+      const pred = this.options.readUntil;
+      const start = ctx.generateTmpVariable();
+      const cur = ctx.generateTmpVariable();
+      ctx.pushCode(`var ${start} = offset;`);
+      ctx.pushCode(`var ${cur} = 0;`);
+      ctx.pushCode(`while (offset < buffer.length) {`);
+      ctx.pushCode(`${cur} = dataView.getUint8(offset);`);
+      const func = ctx.addImport(pred);
+      ctx.pushCode(
+        `if (${func}.call(${ctx.generateVariable()}, ${cur}, buffer.subarray(offset))) break;`
+      );
+      ctx.pushCode(`offset += 1;`);
+      ctx.pushCode(`}`);
+      ctx.pushCode(`${varName} = buffer.subarray(${start}, offset);`);
+    } else if (this.options.readUntil === "eof") {
+      ctx.pushCode(`${varName} = buffer.subarray(offset);`);
+    } else {
+      const len = ctx.generateOption(this.options.length);
+      ctx.pushCode(`${varName} = buffer.subarray(offset, offset + ${len});`);
+      ctx.pushCode(`offset += ${len};`);
+    }
+    if (this.options.clone) {
+      ctx.pushCode(`${varName} = buffer.constructor.from(${varName});`);
+    }
+  }
+  generateArray(ctx) {
+    const length = ctx.generateOption(this.options.length);
+    const lengthInBytes = ctx.generateOption(this.options.lengthInBytes);
+    const type = this.options.type;
+    const counter = ctx.generateTmpVariable();
+    const lhs = ctx.generateVariable(this.varName);
+    const item = ctx.generateTmpVariable();
+    const key = this.options.key;
+    const isHash = typeof key === "string";
+    if (isHash) {
+      ctx.pushCode(`${lhs} = {};`);
+    } else {
+      ctx.pushCode(`${lhs} = [];`);
+    }
+    if (typeof this.options.readUntil === "function") {
+      ctx.pushCode("do {");
+    } else if (this.options.readUntil === "eof") {
+      ctx.pushCode(
+        `for (var ${counter} = 0; offset < buffer.length; ${counter}++) {`
+      );
+    } else if (lengthInBytes !== void 0) {
+      ctx.pushCode(
+        `for (var ${counter} = offset + ${lengthInBytes}; offset < ${counter}; ) {`
+      );
+    } else {
+      ctx.pushCode(
+        `for (var ${counter} = ${length}; ${counter} > 0; ${counter}--) {`
+      );
+    }
+    if (typeof type === "string") {
+      if (!aliasRegistry.get(type)) {
+        const typeName = PRIMITIVE_NAMES[type];
+        const littleEndian = PRIMITIVE_LITTLE_ENDIANS[type];
+        ctx.pushCode(
+          `var ${item} = dataView.get${typeName}(offset, ${littleEndian});`
+        );
+        ctx.pushCode(`offset += ${PRIMITIVE_SIZES[type]};`);
+      } else {
+        const tempVar = ctx.generateTmpVariable();
+        ctx.pushCode(`var ${tempVar} = ${FUNCTION_PREFIX + type}(offset, {`);
+        if (ctx.useContextVariables) {
+          const parentVar = ctx.generateVariable();
+          ctx.pushCode(`$parent: ${parentVar},`);
+          ctx.pushCode(`$root: ${parentVar}.$root,`);
+          if (!this.options.readUntil && lengthInBytes === void 0) {
+            ctx.pushCode(`$index: ${length} - ${counter},`);
+          }
+        }
+        ctx.pushCode(`});`);
+        ctx.pushCode(
+          `var ${item} = ${tempVar}.result; offset = ${tempVar}.offset;`
+        );
+        if (type !== this.alias) ctx.addReference(type);
+      }
+    } else if (type instanceof Parser) {
+      ctx.pushCode(`var ${item} = {};`);
+      const parentVar = ctx.generateVariable();
+      ctx.pushScope(item);
+      if (ctx.useContextVariables) {
+        ctx.pushCode(`${item}.$parent = ${parentVar};`);
+        ctx.pushCode(`${item}.$root = ${parentVar}.$root;`);
+        if (!this.options.readUntil && lengthInBytes === void 0) {
+          ctx.pushCode(`${item}.$index = ${length} - ${counter};`);
+        }
+      }
+      type.generate(ctx);
+      if (ctx.useContextVariables) {
+        ctx.pushCode(`delete ${item}.$parent;`);
+        ctx.pushCode(`delete ${item}.$root;`);
+        ctx.pushCode(`delete ${item}.$index;`);
+      }
+      ctx.popScope();
+    }
+    if (isHash) {
+      ctx.pushCode(`${lhs}[${item}.${key}] = ${item};`);
+    } else {
+      ctx.pushCode(`${lhs}.push(${item});`);
+    }
+    ctx.pushCode("}");
+    if (typeof this.options.readUntil === "function") {
+      const pred = this.options.readUntil;
+      const func = ctx.addImport(pred);
+      ctx.pushCode(
+        `while (!${func}.call(${ctx.generateVariable()}, ${item}, buffer.subarray(offset)));`
+      );
+    }
+  }
+  generateChoiceCase(ctx, varName, type) {
+    if (typeof type === "string") {
+      const varName2 = ctx.generateVariable(this.varName);
+      if (!aliasRegistry.has(type)) {
+        const typeName = PRIMITIVE_NAMES[type];
+        const littleEndian = PRIMITIVE_LITTLE_ENDIANS[type];
+        ctx.pushCode(
+          `${varName2} = dataView.get${typeName}(offset, ${littleEndian});`
+        );
+        ctx.pushCode(`offset += ${PRIMITIVE_SIZES[type]}`);
+      } else {
+        const tempVar = ctx.generateTmpVariable();
+        ctx.pushCode(`var ${tempVar} = ${FUNCTION_PREFIX + type}(offset, {`);
+        if (ctx.useContextVariables) {
+          ctx.pushCode(`$parent: ${varName2}.$parent,`);
+          ctx.pushCode(`$root: ${varName2}.$root,`);
+        }
+        ctx.pushCode(`});`);
+        ctx.pushCode(
+          `${varName2} = ${tempVar}.result; offset = ${tempVar}.offset;`
+        );
+        if (type !== this.alias) ctx.addReference(type);
+      }
+    } else if (type instanceof Parser) {
+      ctx.pushPath(varName);
+      type.generate(ctx);
+      ctx.popPath(varName);
+    }
+  }
+  generateChoice(ctx) {
+    const tag = ctx.generateOption(this.options.tag);
+    const nestVar = ctx.generateVariable(this.varName);
+    if (this.varName) {
+      ctx.pushCode(`${nestVar} = {};`);
+      if (ctx.useContextVariables) {
+        const parentVar = ctx.generateVariable();
+        ctx.pushCode(`${nestVar}.$parent = ${parentVar};`);
+        ctx.pushCode(`${nestVar}.$root = ${parentVar}.$root;`);
+      }
+    }
+    ctx.pushCode(`switch(${tag}) {`);
+    for (const tagString in this.options.choices) {
+      const tag2 = parseInt(tagString, 10);
+      const type = this.options.choices[tag2];
+      ctx.pushCode(`case ${tag2}:`);
+      this.generateChoiceCase(ctx, this.varName, type);
+      ctx.pushCode("break;");
+    }
+    ctx.pushCode("default:");
+    if (this.options.defaultChoice) {
+      this.generateChoiceCase(ctx, this.varName, this.options.defaultChoice);
+    } else {
+      ctx.generateError(`"Met undefined tag value " + ${tag} + " at choice"`);
+    }
+    ctx.pushCode("}");
+    if (this.varName && ctx.useContextVariables) {
+      ctx.pushCode(`delete ${nestVar}.$parent;`);
+      ctx.pushCode(`delete ${nestVar}.$root;`);
+    }
+  }
+  generateNest(ctx) {
+    const nestVar = ctx.generateVariable(this.varName);
+    if (this.options.type instanceof Parser) {
+      if (this.varName) {
+        ctx.pushCode(`${nestVar} = {};`);
+        if (ctx.useContextVariables) {
+          const parentVar = ctx.generateVariable();
+          ctx.pushCode(`${nestVar}.$parent = ${parentVar};`);
+          ctx.pushCode(`${nestVar}.$root = ${parentVar}.$root;`);
+        }
+      }
+      ctx.pushPath(this.varName);
+      this.options.type.generate(ctx);
+      ctx.popPath(this.varName);
+      if (this.varName && ctx.useContextVariables) {
+        if (ctx.useContextVariables) {
+          ctx.pushCode(`delete ${nestVar}.$parent;`);
+          ctx.pushCode(`delete ${nestVar}.$root;`);
+        }
+      }
+    } else if (aliasRegistry.has(this.options.type)) {
+      const tempVar = ctx.generateTmpVariable();
+      ctx.pushCode(
+        `var ${tempVar} = ${FUNCTION_PREFIX + this.options.type}(offset, {`
+      );
+      if (ctx.useContextVariables) {
+        const parentVar = ctx.generateVariable();
+        ctx.pushCode(`$parent: ${parentVar},`);
+        ctx.pushCode(`$root: ${parentVar}.$root,`);
+      }
+      ctx.pushCode(`});`);
+      ctx.pushCode(
+        `${nestVar} = ${tempVar}.result; offset = ${tempVar}.offset;`
+      );
+      if (this.options.type !== this.alias) {
+        ctx.addReference(this.options.type);
+      }
+    }
+  }
+  generateWrapper(ctx) {
+    const wrapperVar = ctx.generateVariable(this.varName);
+    const wrappedBuf = ctx.generateTmpVariable();
+    if (typeof this.options.readUntil === "function") {
+      const pred = this.options.readUntil;
+      const start = ctx.generateTmpVariable();
+      const cur = ctx.generateTmpVariable();
+      ctx.pushCode(`var ${start} = offset;`);
+      ctx.pushCode(`var ${cur} = 0;`);
+      ctx.pushCode(`while (offset < buffer.length) {`);
+      ctx.pushCode(`${cur} = dataView.getUint8(offset);`);
+      const func2 = ctx.addImport(pred);
+      ctx.pushCode(
+        `if (${func2}.call(${ctx.generateVariable()}, ${cur}, buffer.subarray(offset))) break;`
+      );
+      ctx.pushCode(`offset += 1;`);
+      ctx.pushCode(`}`);
+      ctx.pushCode(`${wrappedBuf} = buffer.subarray(${start}, offset);`);
+    } else if (this.options.readUntil === "eof") {
+      ctx.pushCode(`${wrappedBuf} = buffer.subarray(offset);`);
+    } else {
+      const len = ctx.generateOption(this.options.length);
+      ctx.pushCode(`${wrappedBuf} = buffer.subarray(offset, offset + ${len});`);
+      ctx.pushCode(`offset += ${len};`);
+    }
+    if (this.options.clone) {
+      ctx.pushCode(`${wrappedBuf} = buffer.constructor.from(${wrappedBuf});`);
+    }
+    const tempBuf = ctx.generateTmpVariable();
+    const tempOff = ctx.generateTmpVariable();
+    const tempView = ctx.generateTmpVariable();
+    const func = ctx.addImport(this.options.wrapper);
+    ctx.pushCode(
+      `${wrappedBuf} = ${func}.call(this, ${wrappedBuf}).subarray(0);`
+    );
+    ctx.pushCode(`var ${tempBuf} = buffer;`);
+    ctx.pushCode(`var ${tempOff} = offset;`);
+    ctx.pushCode(`var ${tempView} = dataView;`);
+    ctx.pushCode(`buffer = ${wrappedBuf};`);
+    ctx.pushCode(`offset = 0;`);
+    ctx.pushCode(
+      `dataView = new DataView(buffer.buffer, buffer.byteOffset, buffer.length);`
+    );
+    if (this.options.type instanceof Parser) {
+      if (this.varName) {
+        ctx.pushCode(`${wrapperVar} = {};`);
+      }
+      ctx.pushPath(this.varName);
+      this.options.type.generate(ctx);
+      ctx.popPath(this.varName);
+    } else if (aliasRegistry.has(this.options.type)) {
+      const tempVar = ctx.generateTmpVariable();
+      ctx.pushCode(
+        `var ${tempVar} = ${FUNCTION_PREFIX + this.options.type}(0);`
+      );
+      ctx.pushCode(`${wrapperVar} = ${tempVar}.result;`);
+      if (this.options.type !== this.alias) {
+        ctx.addReference(this.options.type);
+      }
+    }
+    ctx.pushCode(`buffer = ${tempBuf};`);
+    ctx.pushCode(`dataView = ${tempView};`);
+    ctx.pushCode(`offset = ${tempOff};`);
+  }
+  generateFormatter(ctx, varName, formatter) {
+    if (typeof formatter === "function") {
+      const func = ctx.addImport(formatter);
+      ctx.pushCode(
+        `${varName} = ${func}.call(${ctx.generateVariable()}, ${varName});`
+      );
+    }
+  }
+  generatePointer(ctx) {
+    const type = this.options.type;
+    const offset = ctx.generateOption(this.options.offset);
+    const tempVar = ctx.generateTmpVariable();
+    const nestVar = ctx.generateVariable(this.varName);
+    ctx.pushCode(`var ${tempVar} = offset;`);
+    ctx.pushCode(`offset = ${offset};`);
+    if (this.options.type instanceof Parser) {
+      ctx.pushCode(`${nestVar} = {};`);
+      if (ctx.useContextVariables) {
+        const parentVar = ctx.generateVariable();
+        ctx.pushCode(`${nestVar}.$parent = ${parentVar};`);
+        ctx.pushCode(`${nestVar}.$root = ${parentVar}.$root;`);
+      }
+      ctx.pushPath(this.varName);
+      this.options.type.generate(ctx);
+      ctx.popPath(this.varName);
+      if (ctx.useContextVariables) {
+        ctx.pushCode(`delete ${nestVar}.$parent;`);
+        ctx.pushCode(`delete ${nestVar}.$root;`);
+      }
+    } else if (aliasRegistry.has(this.options.type)) {
+      const tempVar2 = ctx.generateTmpVariable();
+      ctx.pushCode(
+        `var ${tempVar2} = ${FUNCTION_PREFIX + this.options.type}(offset, {`
+      );
+      if (ctx.useContextVariables) {
+        const parentVar = ctx.generateVariable();
+        ctx.pushCode(`$parent: ${parentVar},`);
+        ctx.pushCode(`$root: ${parentVar}.$root,`);
+      }
+      ctx.pushCode(`});`);
+      ctx.pushCode(
+        `${nestVar} = ${tempVar2}.result; offset = ${tempVar2}.offset;`
+      );
+      if (this.options.type !== this.alias) {
+        ctx.addReference(this.options.type);
+      }
+    } else if (Object.keys(PRIMITIVE_SIZES).indexOf(this.options.type) >= 0) {
+      const typeName = PRIMITIVE_NAMES[type];
+      const littleEndian = PRIMITIVE_LITTLE_ENDIANS[type];
+      ctx.pushCode(
+        `${nestVar} = dataView.get${typeName}(offset, ${littleEndian});`
+      );
+      ctx.pushCode(`offset += ${PRIMITIVE_SIZES[type]};`);
+    }
+    ctx.pushCode(`offset = ${tempVar};`);
+  }
+  generateSaveOffset(ctx) {
+    const varName = ctx.generateVariable(this.varName);
+    ctx.pushCode(`${varName} = offset`);
+  }
+}
+
+function ticksToDate(input) {
+  const epochTicks = 621355968000000000n;
+  const ticksPerMillisecond = 10000n;
+  const maxDateMilliseconds = 8640000000000000n;
+  const ticks = BigInt(input);
+  const ticksSinceEpoch = ticks - epochTicks;
+  const millisecondsSinceEpoch = ticksSinceEpoch / ticksPerMillisecond;
+  if (millisecondsSinceEpoch > maxDateMilliseconds) {
+    throw new Error("Result exceeds max Date");
+  }
+  if (millisecondsSinceEpoch === 0n) return void 0;
+  return new Date(Number(millisecondsSinceEpoch));
+}
+
+const bool = Parser.start().nest({
+  type: Parser.start().uint16le("type", { assert: 264 }).uint8("data", { formatter: (i) => !!i }),
+  formatter: (v) => v.data
+});
+const bitmask = Parser.start().nest({
+  type: Parser.start().uint16le("type", { assert: 2056 }).buffer("data", {
+    length: 4,
+    formatter: (b) => {
+      const hex = b.toString("hex");
+      return hex.length ? hex : void 0;
+    }
+  }),
+  formatter: (i) => {
+    if (i.data === void 0 || i.data === "00000000") {
+      return void 0;
+    } else {
+      return i.data;
+    }
+  }
+});
+const entityIdField = Parser.start().nest({
+  type: Parser.start().uint16("Check", { assert: 2056 }).uint32le("data"),
+  formatter: (i) => i.data || void 0
+});
+const timestamp$1 = Parser.start().nest({
+  type: Parser.start().uint16le("type", { assert: 3336 }).uint64le("data", { formatter: (t) => t === 0n ? void 0 : ticksToDate(t) }),
+  formatter: (v) => v.data
+});
+const varStr = Parser.start().useContextVars(true).nest({
+  type: Parser.start().buffer("offset", {
+    length: 3,
+    formatter: (b) => leb.decodeULEB128(new Uint8Array(b))
+  }).seek(function(...args) {
+    const offset = this.offset[1] - 3;
+    return offset;
+  }).string("string", {
+    length: function() {
+      const length = Number(this.offset[0]);
+      return length;
+    }
+  }),
+  formatter: function(data) {
+    return data.string || void 0;
+  }
+});
+const strings = /* @__PURE__ */ new Map();
+function resetStringTable() {
+  strings.clear();
+}
+const optStr = Parser.start().useContextVars().nest({
+  type: Parser.start().uint8("fieldType", { assert: (t) => t === 6 || t === 9 }).uint32le("fieldID").choice("data", {
+    tag: "fieldType",
+    choices: {
+      6: Parser.start().nest({ type: varStr }),
+      9: Parser.start()
+    }
+  }),
+  formatter: (v) => {
+    if (v.fieldType === 9) {
+      return strings.get(v.fieldID);
+    }
+    if (is.emptyObject(v.data)) {
+      return void 0;
+    }
+    if (typeof v.data === "string") {
+      strings.set(v.fieldID, v.data);
+    }
+    return v.data;
+  }
+});
+const recordCount = Parser.start().nest({
+  type: Parser.start().int8("marker").int8("id").int32le("unknown1").int32le("unknown2").int32le("length").seek(1).array("spacers", { type: optStr, length: "length" }),
+  formatter: (data) => data.length
+});
+const recordHeader = Parser.start().nest({
+  type: Parser.start().uint8("marker", { assert: 16 }).uint32le("recordId").uint32le("fieldCount"),
+  formatter: () => ({})
+});
+
+const fileHeader = Parser.start().seek(22).nest("assembly", { type: varStr }).seek(5).nest("class", { type: varStr }).uint32le("tableCount").array("tableNames", { type: varStr, length: "tableCount" }).seek("tableCount").array("tableTypes", { type: varStr, length: "tableCount", formatter: () => void 0 }).seek(4).array("tableSpacer", { type: optStr, length: "tableCount", formatter: () => void 0 }).nest("optionsRows", { type: recordCount }).nest("moodsRows", { type: recordCount }).nest("userpicsRows", { type: recordCount }).nest("usersRows", { type: recordCount }).nest("eventsRows", { type: recordCount }).nest("commentsRows", { type: recordCount });
+const fileFooter = Parser.start().seek(5).nest("serializer", { type: varStr }).seek(4).nest("data", { type: varStr }).nest("unity", { type: varStr }).nest("assembly", { type: varStr }).seek(4);
+const options$1 = Parser.start().nest({ type: recordHeader }).nest("server", { type: optStr }).nest("defaultUserPic", { type: optStr }).nest("fullName", { type: optStr }).nest("userName", { type: optStr }).nest("passwordHash", { type: optStr }).nest("lastSynced", { type: timestamp$1 }).nest("unknown", { type: bool });
+const mood$1 = Parser.start().nest({ type: recordHeader }).nest("id", { type: entityIdField }).nest("name", { type: optStr }).nest("parentId", { type: entityIdField });
+const userPic = Parser.start().nest({ type: recordHeader }).nest("keyword", { type: optStr }).nest("url", { type: optStr });
+const user$1 = Parser.start().nest({ type: recordHeader }).nest("id", { type: entityIdField }).nest("name", { type: optStr });
+const event$2 = Parser.start().nest({
+  type: Parser.start().nest({ type: recordHeader }).nest("id", { type: entityIdField }).nest("date", { type: timestamp$1 }).nest("security", { type: optStr }).nest("audience", { type: bitmask }).nest("subject", { type: optStr }).nest("body", { type: optStr }).nest("unknown1", { type: optStr }).nest("mood", { type: optStr }).nest("moodId", { type: entityIdField }).nest("music", { type: optStr }).nest("isPreformatted", { type: bool }).nest("noComments", { type: bool }).nest("userPicKeyword", { type: optStr }).nest("unknown2", { type: bool }).nest("isBackdated", { type: bool }).nest("noEmail", { type: bool }).nest("unknown2", { type: bool }).nest("revision", { type: entityIdField }).nest("commentAlter", { type: entityIdField }).nest("syndicationId", { type: optStr }).nest("syndicationUrl", { type: optStr }).nest("lastModified", { type: timestamp$1 })
+});
+const comment$2 = Parser.start().useContextVars().nest({
+  type: Parser.start().nest({ type: recordHeader }).nest("id", { type: entityIdField }).nest("userId", { type: entityIdField }).nest("commentStatus", { type: optStr }).nest("eventId", { type: entityIdField }).nest("parentId", { type: entityIdField }).nest("body", { type: optStr }).nest("subject", { type: optStr }).nest("date", { type: timestamp$1 })
+});
+const file$2 = Parser.start().endianess("little").nest("header", { type: fileHeader }).nest("options", { type: options$1 }).array("moods", {
+  type: mood$1,
+  length: function() {
+    return this.header.moodsRows;
+  }
+}).array("userPics", {
+  type: userPic,
+  length: function() {
+    return this.header.userpicsRows;
+  }
+}).array("users", {
+  type: user$1,
+  length: function() {
+    return this.header.usersRows;
+  }
+}).array("events", {
+  type: event$2,
+  length: function() {
+    return this.header.eventsRows;
+  }
+}).array("comments", {
+  type: comment$2,
+  length: function() {
+    return this.header.commentsRows;
+  }
+}).nest("footer", { type: fileFooter });
+
+const options = z.object({
+  defaultUserPic: z.string().url().optional(),
+  userName: z.string(),
+  fullName: z.string()
+});
+const mood = z.object({
+  id: z.number(),
+  name: z.string(),
+  parentId: z.number().optional()
+});
+const user = z.object({
+  id: z.number().default(0),
+  name: z.string()
+});
+const event$1 = z.object({
+  id: z.number(),
+  date: z.coerce.date(),
+  security: z.string().optional(),
+  audience: z.string().optional(),
+  subject: z.string().optional(),
+  body: z.string().optional(),
+  mood: z.string().optional(),
+  moodId: z.number().optional(),
+  music: z.string().optional(),
+  isPreformatted: z.boolean().optional(),
+  noComments: z.boolean().optional(),
+  userPicKeyword: z.string().optional(),
+  isBackdated: z.boolean().optional(),
+  noEmail: z.boolean().optional(),
+  revision: z.number().optional(),
+  commentAlter: z.number().optional(),
+  syndicationId: z.string().optional(),
+  syndicationUrl: z.string().optional(),
+  lastModified: z.coerce.date().optional()
+});
+const comment$1 = z.object({
+  id: z.number(),
+  /** Resolve the author's name through `users`, which is keyed by this id. */
+  userId: z.number().default(0),
+  /**
+   * LiveJournal's comment state: `A`ctive, `D`eleted, `S`creened. Left as a
+   * plain string rather than an enum — an unrecognized value would fail
+   * validation, and the array-level `.catch()` would then drop the whole
+   * comment rather than the one field.
+   */
+  commentStatus: z.string().optional(),
+  eventId: z.number(),
+  parentId: z.number().optional(),
+  body: z.string().optional(),
+  subject: z.string().optional(),
+  date: z.coerce.date()
+});
+const schema$2 = z.object({
+  options,
+  moods: z.array(mood.optional().catch(() => void 0)).transform((i) => i.filter((i2) => i2 !== void 0)),
+  users: z.array(user.optional().catch(() => void 0)).transform((m) => m.filter((i) => i !== void 0)),
+  events: z.array(event$1.optional().catch(() => void 0)).transform((m) => m.filter((i) => i !== void 0)),
+  comments: z.array(comment$1.optional().catch(() => void 0)).transform((m) => m.filter((i) => i !== void 0))
+});
+
+function parse$2(input) {
+  resetStringTable();
+  const raw = file$2.parse(input);
+  return schema$2.parse(raw);
+}
+
+var index$2 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  file: file$2,
+  parse: parse$2,
+  schema: schema$2
+});
+
+const file$1 = {
+  parse: function(input, options = {}) {
+    const parser = new XMLParser(options);
+    return parser.parse(input.toString());
+  }
+};
+function oneOrMany(schema2) {
+  return schema2.or(z.array(schema2)).transform((i) => i !== void 0 && Array.isArray(i) ? i : [i]);
+}
+const pdate = z.string().transform((d) => dayjs(d).toDate());
+const comment = z.object({
+  itemid: z.number(),
+  parentId: z.number().optional(),
+  event: z.string().optional(),
+  eventtime: pdate,
+  author: z.object({
+    name: z.string(),
+    email: z.string().optional()
+  })
+});
+const event = z.object({
+  itemid: z.number(),
+  eventtime: pdate,
+  subject: z.string().optional(),
+  event: z.string().optional(),
+  current_mood: z.string().optional(),
+  current_music: z.string().optional(),
+  comment: oneOrMany(comment).optional()
+});
+const schema$1 = z.object({
+  livejournal: z.object({
+    entry: oneOrMany(event)
+  })
+});
+
+function parse$1(input) {
+  const raw = file$1.parse(input);
+  return schema$1.parse(raw);
+}
+
+var index$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  file: file$1,
+  parse: parse$1,
+  schema: schema$1
+});
+
+const varString = Parser.start().nest({
+  type: Parser.start().uint16le("mark").seek(1).uint8("length", { formatter: (l) => l * 2 }).choice("data", {
+    tag: "length",
+    choices: {
+      510: Parser.start().nest({
+        type: Parser.start().uint16le("length", { formatter: (l) => l * 2 }).string("string", { length: "length", encoding: "utf-16le" })
+      }),
+      0: Parser.start()
+    },
+    defaultChoice: Parser.start().nest({
+      type: Parser.start().seek(-1).uint8("length", { formatter: (l) => l * 2 }).string("string", { length: "length", encoding: "utf-16le" })
+    })
+  }),
+  formatter: (d) => d.data?.string || void 0
+});
+const timestamp = Parser.start().nest({
+  type: Parser.start().uint32le("data", { formatter: (t) => new Date(t * 1e3) }),
+  formatter: (v) => v.data
+});
+const file = Parser.start().endianess("little").uint16le("check1", { assert: 65535 }).uint16le("check2", { assert: 8 }).uint16le("check3", { assert: 6 }).string("typeCode", { length: 10, stripNull: true, assert: "CEntry" }).array("unknownStrings", { type: varString, length: 11 }).int32le("id").int32le("unknown1").nest("userName", { type: varString }).nest("fullName", { type: varString }).nest("body", { type: varString }).nest("subject", { type: varString }).int32le("unknown2").int32le("unknown3").nest("date", { type: timestamp }).int32le("unknown4").nest("music", { type: varString }).nest("mood", { type: varString }).int32le("moodId").nest("userPic", { type: varString });
+
+const schema = z.object({
+  id: z.number(),
+  date: z.date(),
+  userName: z.string().optional(),
+  fullName: z.string().optional(),
+  subject: z.string().optional(),
+  body: z.string().optional(),
+  mood: z.string().optional(),
+  music: z.string().optional(),
+  userPic: z.string().optional()
+});
+
+function parse(input) {
+  const raw = file.parse(input);
+  return schema.parse(raw);
+}
+
+var index = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  file: file,
+  parse: parse,
+  schema: schema,
+  timestamp: timestamp
+});
+
+function parseCutTag(markup, trim = false) {
+  const cutExp = /<lj-cut(?:\s+text=([^>]*))?>/is;
+  const closeExp = /<\/lj-cut>/is;
+  let cut = cutExp.exec(markup) ?? void 0;
+  const output = {};
+  if (!cut) {
+    output.preCut = trim ? markup.trim() : markup;
+  } else {
+    let cutText = cut[1]?.replaceAll(/(^['"]|['"]$)/g, "");
+    let [preCut, postCutRaw] = markup.split(cut[0]);
+    let hiddenText = void 0;
+    let postCut = void 0;
+    if (closeExp.test(postCutRaw)) {
+      [hiddenText, postCut] = postCutRaw.split(closeExp);
+    } else {
+      postCut = postCutRaw;
+    }
+    preCut = trim ? preCut?.trim() : preCut;
+    cutText = trim ? cutText?.trim() : cutText;
+    hiddenText = trim ? hiddenText?.trim() : hiddenText;
+    postCut = trim ? postCut?.trim() : postCut;
+    if (preCut) output.preCut = preCut;
+    if (cutText) output.cutText = cutText;
+    if (hiddenText) output.hiddenText = hiddenText;
+    if (postCut) output.postCut = postCut;
+  }
+  return { ...output };
+}
+
+function parseUserTags(html) {
+  const matches = html.matchAll(/<lj user=['"]?(\w*)['"]?[^>]*>/gi) ?? [];
+  return Object.fromEntries([...matches].map((m) => [m[0], m[1]]));
+}
+
+export { index$2 as lja, parseCutTag, parseUserTags, index as slj, index$1 as xml };

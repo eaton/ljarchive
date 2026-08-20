@@ -116,7 +116,7 @@ const comment = Parser.start().useContextVars().nest({
     .nest({ type: recordHeader })
     .nest('id', { type: entityIdField })
     .nest('userId', { type: entityIdField })
-    .nest('userName', { type: optStr })
+    .nest('commentStatus', { type: optStr })
     .nest('eventId', { type: entityIdField })
     .nest('parentId', { type: entityIdField })
     .nest('body', { type: optStr })
